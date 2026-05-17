@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol.Formats.Image</RootNamespace>
+    <AssemblyName>Vitriol.Formats.Image</AssemblyName>
+    <Description>Image transcoding (PNG / JPG / WebP / BMP / TIFF / GIF / PBM / TGA) via SixLabors.ImageSharp.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="SixLabors.ImageSharp" />
+  </ItemGroup>
+
+</Project>

@@ -15,7 +15,8 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 4 | Round-trip verifier | done |
 | 5 | First IR handler (Text) + `Vitriol.Cli` | done |
 | 6 | Stone audio v1 hosts (WAV + AIFF) | done |
-| 6+ | Image / Doc / Media / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
+| 7 | Image handler (`Vitriol.Formats.Image` via SixLabors.ImageSharp) | done |
+| 8+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
 
 ## Build
 
@@ -37,6 +38,10 @@ dotnet run --project Vitriol.Cli -- convert <src> <dst> [--verify] [--password <
 Examples:
 
 ```bash
+# Image transcoding via SixLabors.ImageSharp (same-handler media path)
+dotnet run --project Vitriol.Cli -- convert photo.png photo.jpg
+dotnet run --project Vitriol.Cli -- convert photo.png photo.webp
+
 # Plain-text pass-through with byte-perfect whitespace preservation
 dotnet run --project Vitriol.Cli -- convert in.txt out.log
 
@@ -66,6 +71,7 @@ dotnet/
 ├── Vitriol.Core/               # IRs, abstractions, router, detection, registry, 10 routing gates, verifier
 ├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/PNG-v1/WAV-v1/AIFF-v1 hosts
 ├── Vitriol.Formats.Text/       # PlainTextHandler — txt/log/py/xml/html read+write+stream
+├── Vitriol.Formats.Image/      # ImageMediaHandler — png/jpg/webp/bmp/tiff/gif/pbm/tga via ImageSharp
 ├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
 └── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```

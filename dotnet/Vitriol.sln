@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Stone", "Vitriol.St
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Formats.Text", "Vitriol.Formats.Text\Vitriol.Formats.Text.csproj", "{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Formats.Image", "Vitriol.Formats.Image\Vitriol.Formats.Image.csproj", "{022F1CC4-3B79-4C25-9875-8639D0CF7096}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Cli", "Vitriol.Cli\Vitriol.Cli.csproj", "{BD2D614D-CC8F-4C61-9B2A-40F961F92022}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Tests", "Vitriol.Tests\Vitriol.Tests.csproj", "{D92BBFA1-E056-4538-A5B9-79519FA48FFD}"
@@ -30,6 +32,10 @@ Global
 		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{022F1CC4-3B79-4C25-9875-8639D0CF7096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{022F1CC4-3B79-4C25-9875-8639D0CF7096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{022F1CC4-3B79-4C25-9875-8639D0CF7096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{022F1CC4-3B79-4C25-9875-8639D0CF7096}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Release|Any CPU.ActiveCfg = Release|Any CPU
