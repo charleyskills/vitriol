@@ -14,6 +14,8 @@ public sealed class RoundTripVerifierTests : IDisposable
     [InlineData(".txt")]
     [InlineData(".zip")]
     [InlineData(".png")]
+    [InlineData(".wav")]
+    [InlineData(".aiff")]
     public async Task Stone_host_round_trips_to_byte_equal(string hostExt)
     {
         ServiceProvider sp = BuildStoneProvider();

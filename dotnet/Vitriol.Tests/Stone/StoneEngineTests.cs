@@ -16,12 +16,15 @@ public sealed class StoneEngineTests
     }
 
     [Fact]
-    public void Registered_extensions_include_txt_zip_png()
+    public void Registered_extensions_include_all_v1_hosts()
     {
         IStoneEngine engine = BuildEngine();
         engine.CanEmbedInto(".txt").ShouldBeTrue();
         engine.CanEmbedInto(".zip").ShouldBeTrue();
         engine.CanEmbedInto(".png").ShouldBeTrue();
+        engine.CanEmbedInto(".wav").ShouldBeTrue();
+        engine.CanEmbedInto(".aiff").ShouldBeTrue();
+        engine.CanEmbedInto(".aif").ShouldBeTrue();
     }
 
     [Fact]
@@ -46,6 +49,8 @@ public sealed class StoneEngineTests
     [InlineData(".txt")]
     [InlineData(".zip")]
     [InlineData(".png")]
+    [InlineData(".wav")]
+    [InlineData(".aiff")]
     public async Task End_to_end_embed_then_extract_recovers_bytes(string hostExt)
     {
         IStoneEngine engine = BuildEngine();

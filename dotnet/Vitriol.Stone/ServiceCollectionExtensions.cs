@@ -23,6 +23,8 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IStoneHost, TxtStoneHost>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IStoneHost, ZipStoneHost>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IStoneHost, PngStoneHost>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IStoneHost, WavStoneHost>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IStoneHost, AiffStoneHost>());
 
         // Engine.
         services.TryAddSingleton<IStoneEngine, StoneEngine>();
