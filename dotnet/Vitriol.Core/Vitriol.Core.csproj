@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol.Core</RootNamespace>
+    <AssemblyName>Vitriol.Core</AssemblyName>
+    <Description>Vitriol .NET 10 port — core IR, abstractions, router, verifier.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Vitriol.Tests" />
+  </ItemGroup>
+
+</Project>
