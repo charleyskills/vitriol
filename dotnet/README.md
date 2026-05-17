@@ -69,14 +69,21 @@ dotnet run --project Vitriol.Cli -- convert notes.docx notes.md       # DOCX →
 dotnet run --project Vitriol.Cli -- convert paper.pdf paper.md        # PDF → Markdown (warns on scanned/empty PDFs)
 dotnet run --project Vitriol.Cli -- convert article.md article.docx   # Markdown → DOCX
 
-# Password-protected 7-Zip hidden inside a Mandelbrot fractal PNG
-dotnet run --project Vitriol.Cli -- convert secrets.7z hidden.png --password chopin --verify
-# Forward: encrypts the 7z bytes under Vitriol's Stone v3 AES-256-CTR (PBKDF2
-# from "chopin") and scatter-packs them into the LSBs of a real fractal PNG.
-dotnet run --project Vitriol.Cli -- convert hidden.png recovered.7z --password chopin --verify
-# Reverse: byte-for-byte recovery; wrong password produces silent garbage
-# (no oracle), so don't lose the password. --password implies --masquerade,
-# so the flag is optional when you also pass --password.
+# A 7-Zip archive hidden inside a Mandelbrot fractal PNG
+# Vitriol treats the .7z as opaque bytes — it never opens the archive and
+# DOES NOT need the 7z's own internal password.
+dotnet run --project Vitriol.Cli -- convert secrets.7z hidden.png --masquerade --verify
+dotnet run --project Vitriol.Cli -- convert hidden.png recovered.7z --masquerade --verify
+# When the source 7z is ALREADY encrypted (7z a -p"…" secrets.7z …), the above
+# is sufficient — 7-Zip's internal AES-256 keeps the contents safe.
+
+# OPTIONAL second encryption layer via Vitriol's own --password (Stone v3
+# AES-256-CTR, PBKDF2-derived). Useful when the source is plaintext, or as
+# belt-and-suspenders on top of an already-encrypted 7z.
+dotnet run --project Vitriol.Cli -- convert plaintext.bin hidden.png --password chopin --verify
+dotnet run --project Vitriol.Cli -- convert hidden.png recovered.bin --password chopin --verify
+# Wrong --password produces silent garbage (no oracle), so don't lose it.
+# --password implies --masquerade.
 
 # THE headline new property: trailer-envelope byte-perfect round trip
 dotnet run --project Vitriol.Cli -- convert photo.png photo.docx --verify
@@ -102,22 +109,32 @@ vitriol convert --help
 
 Exit codes: `0` success · `2` usage · `64` unsupported conversion · `65` verification failed · `70` internal error.
 
-### Two password layers when hiding an encrypted archive in an image
+### Why Vitriol never asks for your 7z's password
 
-The `7z → png` workflow above involves **two independent passwords** that
-do not interact:
+Vitriol treats `.7z` (and every other source format) as an **opaque byte
+stream**. It does not open the archive, does not read its central
+directory, does not decrypt anything inside. So the password you set
+with `7z a -p"…"` stays inside the `.7z` file — Vitriol never asks for
+it and you should never pass it via `--password`.
 
-1. **The 7-Zip archive's own AES-256.** 7-Zip's `-p` flag protects the
-   files inside the archive. Vitriol never sees the inside; it only
-   handles the encrypted `.7z` byte stream as opaque payload.
-2. **Vitriol's Stone v3 AES-256-CTR.** The `--password` flag derives a
-   key via PBKDF2-HMAC-SHA256 (200,000 iterations) and encrypts the
-   UCMSv3 envelope that wraps those `.7z` bytes before the LSB scatter-
-   pack into the Mandelbrot pixels.
+### Two independent layers (optional)
 
-After recovery, you still need the 7z's internal password to extract
-the files inside. Either password can be forgotten without affecting
-the other layer's correctness, but losing **either one** makes the
+There are up to two encryption layers in play, and they do not interact:
+
+1. **The 7-Zip archive's own AES-256** (optional, applied by 7-Zip when
+   you create the archive with `-p`). Protects the *files inside* the
+   archive.
+2. **Vitriol's Stone v3 AES-256-CTR** (optional, applied by Vitriol when
+   you pass `--password`). PBKDF2-HMAC-SHA256 (200,000 iterations)
+   derives a key and encrypts the UCMSv3 envelope that wraps the `.7z`
+   bytes before the LSB scatter-pack into the Mandelbrot pixels.
+
+If your 7z is already encrypted, layer 2 is redundant — omit
+`--password`. If your source is plaintext and you want protection,
+layer 2 is the easy way to get AES-256 without re-archiving.
+
+Either password can be forgotten without affecting the other layer's
+correctness, but losing the **only** password layer in use makes the
 contents unrecoverable.
 
 Vitriol's `--password` follows a **no-oracle policy**: the wrong
