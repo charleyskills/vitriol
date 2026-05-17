@@ -12,7 +12,7 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 1 | `Vitriol.Core` foundation (IRs, interfaces, adapters) | done |
 | 2 | Detection + Router | done |
 | 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | partial — UCMSv1 + TXT/ZIP/PNG-v1 done; PNG-v3 Mandelbrot deferred |
-| 4 | Round-trip verifier | not started |
+| 4 | Round-trip verifier | done |
 | 5 | First IR handler (Text) + `Vitriol.Cli` | not started |
 | 6+ | Image / Doc / Media / 3D / Stone audio + video / Bootstrap | deferred |
 

@@ -5,15 +5,17 @@ using Vitriol.Core.Detection.Sniffers;
 using Vitriol.Core.Ir.Adapters;
 using Vitriol.Core.Pipeline;
 using Vitriol.Core.Routing;
+using Vitriol.Core.Verification;
 
 namespace Vitriol.Core.Registry;
 
 /// <summary>
 /// DI registration for Vitriol.Core. Registers the IR adapter registry, the
 /// format detector with its built-in sniffers, the format registry, the
-/// conversion router, and every non-Stone routing gate. Stone-aware gates
-/// (Compiler, PhilosophersStone, CrossCategoryDocumentToMedia) are registered
-/// by <c>AddVitriolStone()</c> in the Vitriol.Stone assembly.
+/// conversion router, the round-trip verifier, and every non-Stone routing
+/// gate. Stone-aware gates (Compiler, PhilosophersStone,
+/// CrossCategoryDocumentToMedia) are registered by <c>AddVitriolStone()</c>
+/// in the Vitriol.Stone assembly.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -42,6 +44,10 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IRoutingGate, WholeFileIrGate>());
 
         services.TryAddSingleton<IConversionRouter, ConversionRouter>();
+
+        // Verification (Sprint 4).
+        services.TryAddSingleton<IStructuralEquivalence, IrStructuralEquivalence>();
+        services.TryAddSingleton<IRoundTripVerifier, RoundTripVerifier>();
 
         return services;
     }
