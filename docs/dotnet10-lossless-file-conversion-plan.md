@@ -269,6 +269,19 @@ This is the **only** in-process correctness signal Vitriol provides. The forward
 
 **3D rigging.** The README enumerates several known caveats in detail: `glb→fbx` loses the `BindPose`/`PoseNode` chunks; `dae→fbx` round-trip on a Vitriol-generated DAE fails because Assimp can't re-read its own `$AssimpFbx$`-escaped node names; blendshapes and KHR_materials_specular degrade through Collada. These are properties of Assimp and the source-format specs, not bugs in Vitriol.
 
+**Password-protected archive hidden in an image** (`.7z → .png → .7z`).
+A common user workflow exercises Stone v3 over an already-encrypted
+archive: `vitriol convert encrypted.7z hidden.png --password vitriol-pass --verify`.
+The `.7z`'s own internal AES-256 is preserved as opaque payload; Vitriol's
+Stone v3 AES-256-CTR (PBKDF2 from `--password`) encrypts the envelope
+wrapping those bytes before the Mandelbrot LSB scatter-pack. The two
+password layers are independent — recovering the `.7z` byte-for-byte
+requires the Stone password; opening the contents inside requires the
+7z's own password. Either password lost in isolation breaks only its
+own layer, but both losses are unrecoverable. Sprint 12+ CLI behavior:
+`--password` implicitly engages `--masquerade`, so a single command
+suffices for either direction.
+
 ---
 
 ## 5. Bidirectional Flow

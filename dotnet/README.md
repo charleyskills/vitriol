@@ -69,6 +69,15 @@ dotnet run --project Vitriol.Cli -- convert notes.docx notes.md       # DOCX →
 dotnet run --project Vitriol.Cli -- convert paper.pdf paper.md        # PDF → Markdown (warns on scanned/empty PDFs)
 dotnet run --project Vitriol.Cli -- convert article.md article.docx   # Markdown → DOCX
 
+# Password-protected 7-Zip hidden inside a Mandelbrot fractal PNG
+dotnet run --project Vitriol.Cli -- convert secrets.7z hidden.png --password chopin --verify
+# Forward: encrypts the 7z bytes under Vitriol's Stone v3 AES-256-CTR (PBKDF2
+# from "chopin") and scatter-packs them into the LSBs of a real fractal PNG.
+dotnet run --project Vitriol.Cli -- convert hidden.png recovered.7z --password chopin --verify
+# Reverse: byte-for-byte recovery; wrong password produces silent garbage
+# (no oracle), so don't lose the password. --password implies --masquerade,
+# so the flag is optional when you also pass --password.
+
 # THE headline new property: trailer-envelope byte-perfect round trip
 dotnet run --project Vitriol.Cli -- convert photo.png photo.docx --verify
 # Forward writes a DOCX containing photo's bytes stashed at _vitriol/original.bin.
@@ -92,6 +101,31 @@ vitriol convert --help
 ```
 
 Exit codes: `0` success · `2` usage · `64` unsupported conversion · `65` verification failed · `70` internal error.
+
+### Two password layers when hiding an encrypted archive in an image
+
+The `7z → png` workflow above involves **two independent passwords** that
+do not interact:
+
+1. **The 7-Zip archive's own AES-256.** 7-Zip's `-p` flag protects the
+   files inside the archive. Vitriol never sees the inside; it only
+   handles the encrypted `.7z` byte stream as opaque payload.
+2. **Vitriol's Stone v3 AES-256-CTR.** The `--password` flag derives a
+   key via PBKDF2-HMAC-SHA256 (200,000 iterations) and encrypts the
+   UCMSv3 envelope that wraps those `.7z` bytes before the LSB scatter-
+   pack into the Mandelbrot pixels.
+
+After recovery, you still need the 7z's internal password to extract
+the files inside. Either password can be forgotten without affecting
+the other layer's correctness, but losing **either one** makes the
+contents unrecoverable.
+
+Vitriol's `--password` follows a **no-oracle policy**: the wrong
+password produces silent garbage bytes rather than an error. The
+recovered `.7z` file simply won't open in any 7z client. There is no
+way to tell "wrong password" from "right password but corrupted
+carrier" — that's by design (`docs/dotnet10-lossless-file-conversion-plan.md`
+Section 4).
 
 ## Project layout
 

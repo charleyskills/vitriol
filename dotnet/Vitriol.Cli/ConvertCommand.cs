@@ -126,7 +126,11 @@ public sealed class ConvertCommand
         ConversionJob job = new(parsed.Source, parsed.Destination, srcExt, dstExt)
         {
             VerifyRoundTrip = false, // the verifier runs the doubled conversion itself
-            Masquerade = parsed.Masquerade,
+            // --password implies --masquerade. Password only has meaning in the
+            // Stone path, so passing it without --masquerade would be a silent
+            // no-op on most routes. Users who want masquerade *without* a
+            // password still pass --masquerade explicitly.
+            Masquerade = parsed.Masquerade || parsed.Password is not null,
             Compiler = parsed.Compiler,
             Password = parsed.Password is null
                 ? ReadOnlyMemory<byte>.Empty
