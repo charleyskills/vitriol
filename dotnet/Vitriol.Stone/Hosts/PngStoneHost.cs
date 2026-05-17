@@ -1,22 +1,32 @@
 using System.Buffers.Binary;
 using System.IO.Compression;
 using System.IO.Hashing;
+using System.Security.Cryptography;
 using Vitriol.Core.Pipeline;
+using Vitriol.Stone.Carriers;
 using Vitriol.Stone.Envelope;
 
 namespace Vitriol.Stone.Hosts;
 
 /// <summary>
-/// PNG host (UCMSv1, "ucMs" private chunk). Builds a real 1×1 transparent
-/// RGBA PNG with the envelope tucked into a private ancillary chunk. Mirrors
-/// <c>_png_embed</c> / <c>_png_extract</c> in
-/// <c>app/format_handlers/masquerade.py:935-971</c>.
+/// PNG Stone host. Routes between two carrier variants:
+/// <list type="bullet">
+/// <item><b>v1</b> (UCMSv1, private <c>ucMs</c> chunk on a 1×1 RGBA PNG) —
+/// the simple "byte envelope inside a placeholder PNG" form for
+/// same-category passwordless conversions. Mirrors <c>_png_embed</c> at
+/// <c>app/format_handlers/masquerade.py:935-971</c>.</item>
+/// <item><b>v3</b> (Sprint 10 — UCMSv3 encrypted envelope scatter-packed
+/// into Mandelbrot fractal LSBs) — the headline visual carrier. Mirrors
+/// <c>_build_mandelbrot_image</c> at <c>masquerade.py:3283-3332</c>.</item>
+/// </list>
 ///
-/// <para>The UCMSv3 Mandelbrot-XOR variant (which renders a deterministic
-/// fractal carrier and bit-packs the encrypted payload into the LSBs) is
-/// substantially more complex and is delivered in a follow-up commit. v1
-/// PNGs from Vitriol's <c>samples/</c> still round-trip byte-identically
-/// through this host.</para>
+/// <para><b>Routing rule</b> (mirrors Python <c>_png_embed</c> callers):
+/// v3 fires when <see cref="StoneOptions.CrossCategory"/> is set or a
+/// password is supplied; otherwise v1.</para>
+///
+/// <para><b>Extract</b>: probes for the <c>ucMs</c> chunk first; if not
+/// found, falls back to v3 (decode pixels, unpack LSBs, parse UCMSv3).
+/// Wrong-password v3 extract returns garbled bytes (no oracle).</para>
 /// </summary>
 public sealed class PngStoneHost : IStoneHost
 {
@@ -41,6 +51,7 @@ public sealed class PngStoneHost : IStoneHost
         {
             return false;
         }
+        // First pass: look for the v1 ucMs chunk.
         await foreach ((string tag, _, _) in ReadChunkHeadersAsync(source, cancellationToken).ConfigureAwait(false))
         {
             if (tag == "ucMs")
@@ -52,14 +63,97 @@ public sealed class PngStoneHost : IStoneHost
                 break;
             }
         }
-        return false;
+
+        // No v1 chunk → check for v3 (Mandelbrot LSB scatter pack). Decode the
+        // PNG, unpack the first 8 envelope bytes, and look for the UCMSv3 magic.
+        // This is slower but the only reliable signal for v3 carriers.
+        source.Position = 0;
+        try
+        {
+            MandelbrotPngCodec.Decoded decoded =
+                await MandelbrotPngCodec.ReadRgbAsync(source, cancellationToken).ConfigureAwait(false);
+            long totalPixelBytes = (long)decoded.Width * decoded.Height * 3;
+            byte[] prefix = MandelbrotBitPack.Unpack(
+                decoded.PixelsRgb,
+                maxEnvelopeBytes: UcmsMagic.V8Length,
+                totalPixelBytes: totalPixelBytes);
+            return prefix.Length >= UcmsMagic.V8Length
+                && prefix.AsSpan(0, UcmsMagic.V8Length).SequenceEqual(UcmsMagic.V3);
+        }
+        catch (InvalidDataException)
+        {
+            return false;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
     }
 
-    public async ValueTask EmbedAsync(
+    public ValueTask EmbedAsync(
         ReadOnlyMemory<byte> sourceBytes,
         string sourceExtension,
         Stream destination,
         StoneOptions options,
+        CancellationToken cancellationToken)
+    {
+        // Python masquerade.py: v3 fires for cross-category sources or when a
+        // password is supplied. Otherwise v1 (ucMs chunk on a 1×1 placeholder).
+        bool useV3 = options.CrossCategory || !options.Password.IsEmpty;
+        return useV3
+            ? EmbedV3Async(sourceBytes, sourceExtension, destination, options, cancellationToken)
+            : EmbedV1Async(sourceBytes, sourceExtension, destination, cancellationToken);
+    }
+
+    public async ValueTask<StoneExtractionResult> ExtractAsync(
+        Stream source,
+        string sourceExtension,
+        StoneOptions options,
+        CancellationToken cancellationToken)
+    {
+        if (!await CheckPngSignatureAsync(source, cancellationToken).ConfigureAwait(false))
+        {
+            throw new StoneEnvelopeException("Not a PNG file.");
+        }
+
+        // First pass: look for a v1 ucMs chunk.
+        await foreach ((string tag, int dataLength, long dataStart) in
+            ReadChunkHeadersAsync(source, cancellationToken).ConfigureAwait(false))
+        {
+            if (tag == "ucMs")
+            {
+                byte[] envBytes = new byte[dataLength];
+                source.Position = dataStart;
+                int total = 0;
+                while (total < dataLength)
+                {
+                    int n = await source.ReadAsync(envBytes.AsMemory(total), cancellationToken).ConfigureAwait(false);
+                    if (n == 0)
+                    {
+                        break;
+                    }
+                    total += n;
+                }
+                UcmsEnvelope envelope = UcmsEnvelope.Parse(envBytes);
+                return new StoneExtractionResult(envelope.Payload, envelope.Extension);
+            }
+            if (tag == "IEND")
+            {
+                break;
+            }
+            // Skip to next chunk (data + 4-byte CRC follow the header).
+            source.Position = dataStart + dataLength + 4;
+        }
+
+        // No v1 chunk → fall back to v3 (decode pixels and unpack LSBs).
+        source.Position = 0;
+        return await ExtractV3Async(source, options, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async ValueTask EmbedV1Async(
+        ReadOnlyMemory<byte> sourceBytes,
+        string sourceExtension,
+        Stream destination,
         CancellationToken cancellationToken)
     {
         UcmsEnvelope envelope = new(sourceExtension, sourceBytes);
@@ -90,45 +184,60 @@ public sealed class PngStoneHost : IStoneHost
         await WriteChunkAsync(destination, TagIend, Array.Empty<byte>(), cancellationToken).ConfigureAwait(false);
     }
 
-    public async ValueTask<StoneExtractionResult> ExtractAsync(
-        Stream source,
+    private async ValueTask EmbedV3Async(
+        ReadOnlyMemory<byte> sourceBytes,
         string sourceExtension,
+        Stream destination,
         StoneOptions options,
         CancellationToken cancellationToken)
     {
-        if (!await CheckPngSignatureAsync(source, cancellationToken).ConfigureAwait(false))
-        {
-            throw new StoneEnvelopeException("Not a PNG file.");
-        }
+        // 1. Dry-run envelope at (1, 1) to size the carrier — the inner
+        //    plaintext determines the encrypted length, and the header is
+        //    fixed at 36 bytes regardless of W/H.
+        UcmsV3Envelope sizingEnv = new(1, 1, sourceExtension, sourceBytes);
+        byte[] sizingBytes = sizingEnv.Build(options.Password);
+        (int width, int height) = MandelbrotDims.ForEnvelope(sizingBytes.Length);
 
-        await foreach ((string tag, int dataLength, long dataStart) in
-            ReadChunkHeadersAsync(source, cancellationToken).ConfigureAwait(false))
-        {
-            if (tag == "ucMs")
-            {
-                byte[] envBytes = new byte[dataLength];
-                source.Position = dataStart;
-                int total = 0;
-                while (total < dataLength)
-                {
-                    int n = await source.ReadAsync(envBytes.AsMemory(total), cancellationToken).ConfigureAwait(false);
-                    if (n == 0)
-                    {
-                        break;
-                    }
-                    total += n;
-                }
-                UcmsEnvelope envelope = UcmsEnvelope.Parse(envBytes);
-                return new StoneExtractionResult(envelope.Payload, envelope.Extension);
-            }
-            if (tag == "IEND")
-            {
-                break;
-            }
-            // Skip to next chunk (data + 4-byte CRC follow the header).
-            source.Position = dataStart + dataLength + 4;
-        }
-        throw new StoneEnvelopeException("PNG has no ucMs chunk.");
+        // 2. Real envelope with the correct W/H baked in.
+        UcmsV3Envelope envelope = new(width, height, sourceExtension, sourceBytes);
+        byte[] envBytes = envelope.Build(options.Password);
+
+        // 3. Mandelbrot seed: SHA-256 of envelope[:64KB], wrapped with
+        //    salt + W + H by MandelbrotSeed.Derive.
+        int seedSliceLen = Math.Min(envBytes.Length, 64 * 1024);
+        Span<byte> seedHash = stackalloc byte[32];
+        SHA256.HashData(envBytes.AsSpan(0, seedSliceLen), seedHash);
+        MandelbrotSeed.Result seed = MandelbrotSeed.Derive(width, height, seedHash);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // 4. Render fractal pixels (W·H·3 RGB bytes).
+        byte[] pixels = MandelbrotGenerator.Generate(width, height, seed);
+
+        // 5. Scatter-pack envelope into pixel LSBs (in-place).
+        MandelbrotBitPack.Pack(envBytes, pixels);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // 6. Emit a valid PNG.
+        await MandelbrotPngCodec.WriteRgbAsync(destination, width, height, pixels, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static async ValueTask<StoneExtractionResult> ExtractV3Async(
+        Stream source,
+        StoneOptions options,
+        CancellationToken cancellationToken)
+    {
+        MandelbrotPngCodec.Decoded decoded =
+            await MandelbrotPngCodec.ReadRgbAsync(source, cancellationToken).ConfigureAwait(false);
+
+        long totalPixelBytes = (long)decoded.Width * decoded.Height * 3;
+        int maxEnv = (int)Math.Min(totalPixelBytes / MandelbrotBitPack.PixelBytesPerEnvelopeByte, int.MaxValue);
+        byte[] envBytes = MandelbrotBitPack.Unpack(decoded.PixelsRgb, maxEnv);
+
+        UcmsV3Envelope envelope = UcmsV3Envelope.Parse(envBytes, options.Password);
+        return new StoneExtractionResult(envelope.Payload, envelope.Extension);
     }
 
     private static async ValueTask<bool> CheckPngSignatureAsync(Stream source, CancellationToken cancellationToken)

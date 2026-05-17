@@ -27,12 +27,13 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | 7 | `Vitriol.Formats.Image` — first `IMediaHandler` via SixLabors.ImageSharp; covers PNG/JPG/WebP/BMP/TIFF/GIF/PBM/TGA. Lights up `SameMediaHandlerGate` and `CrossCategoryImageToDocumentGate` (origin sidecar path) | ✅ |
 | 8 | `Vitriol.Formats.Tabular` — `CsvTextHandler` (.csv/.tsv via CsvHelper) + `XlsxHandler` (.xlsx via ClosedXML). First `DocKind.Tabular` producers/consumers in the port; `TabularToTextDocAdapter` now fires in production via cross-kind CSV → text/markdown/html | ✅ |
 | 9 | `Vitriol.Formats.Archive` — `ArchiveHandler` via SharpCompress. ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ read+write with same-kind byte passthrough and cross-kind repack via SharpCompress's `IReader`/`IWriter`. 7Z/CB7, RAR/CBR, TAR.ZST are read-only. First `DocKind.Archive` producer/consumer in the port. Zip-Slip mitigation included | 🟡 7Z write + TAR.ZST write + RAR write deferred (library / format constraints) |
+| 10 | Stone PNG v3 — Mandelbrot fractal carrier with UCMSv3 LSB scatter-pack. `MandelbrotViewports` (64 curated viewports), `MandelbrotSeed` (port of `derive_seed`), `MandelbrotGenerator` (float32 iteration + three-sin palette), `MandelbrotDims` (tier table), `MandelbrotBitPack` (golden-ratio scatter coprime stride, MSB-first), `MandelbrotPngCodec` (hand-rolled RGB PNG with all 5 filter types on read). `PngStoneHost` dispatches v1 vs v3 by `options.CrossCategory \|\| !Password.IsEmpty`; v3 extract preserves the no-oracle property on wrong password | 🟡 NumPy pixel-byte parity not guaranteed (visual fractal only); LSB scatter positions match Python exactly so cross-implementation payload extract works. Streaming-strip processing for >50 MB payloads deferred |
 
-### Outstanding deferred work (Sprint 10+, no fixed order)
+### Outstanding deferred work (Sprint 11+, no fixed order)
 
 | Area | Status | Notes |
 |---|---|---|
-| Stone PNG v3 (Mandelbrot fractal carrier + k=1 LSB bit-pack + `Vector<double>` SIMD) | ⏳ | Substantial; needs exact byte parity with Python's NumPy iteration scheme |
+| Stone PNG v3 — NumPy pixel-byte parity + streaming-strip processing | ⏳ | Sprint 10 ships the visual fractal + correct LSB positions; byte-exact match with Python's iteration scheme and the >50 MB streaming path are deferred |
 | Stone audio v3 (procedural music synthesis port of `_music.py`, FLAC via FFmpeg, M4A/ALAC via FFmpeg) | ⏳ | Music synth port + FFmpeg subprocess wrapper |
 | Stone video v3 (MKV animated Mandelbrot at 30 fps, payload in pixel LSBs) | ⏳ | Highest complexity in the Stone catalogue; needs FFmpeg frame pipe |
 | Stone 3D v3 (PLY / OBJ / GLB envelope embedding) | ⏳ | Format-aware byte stuffing; modest scope |
@@ -55,7 +56,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 ### Component summary (where the code lives today)
 
 `dotnet/Vitriol.Core/` ✅ — IR, adapters, detection, registry, routing, verification.
-`dotnet/Vitriol.Stone/` 🟡 — envelope + crypto + 5 of ~10 carrier hosts (TXT, ZIP, PNG-v1, WAV-v1, AIFF-v1).
+`dotnet/Vitriol.Stone/` 🟡 — envelope + crypto + 5 carrier-host extensions (TXT, ZIP, PNG v1+v3, WAV-v1, AIFF-v1). PNG v3 ships the Mandelbrot fractal LSB scatter-pack.
 `dotnet/Vitriol.Formats.Text/` ✅ — `PlainTextHandler` for .txt/.log/.py/.xml/.html.
 `dotnet/Vitriol.Formats.Image/` ✅ — `ImageMediaHandler` for 8 image format families.
 `dotnet/Vitriol.Formats.Tabular/` 🟡 — `CsvTextHandler` (.csv/.tsv) + `XlsxHandler` (.xlsx); Parquet/Feather/ORC deferred.
@@ -523,7 +524,7 @@ The byte-lossless guarantee must come from a small set of mechanisms, each of wh
 | 3. Intermediate model | ✅ | Port `intermediate.py` to immutable C# records | `Vitriol.Core.Ir` records + adapter registry | Solution compiles, unit tests for record equality pass | Misnaming `List` (reserved-ish) → use `ListBlock` | xUnit equality tests pass (Sprint 1) |
 | 4. Adapter extraction | ✅ | Build `IFormatRegistry`, gate-based router | `IRoutingGate` impls one per current `router.py` branch | Router runs but rejects every conversion (no handlers yet) | Wrong gate order → wrong dispatch | Run with mocked handlers; assert each gate matches its Vitriol counterpart (Sprint 2) |
 | 5. Reader/writer implementations | 🟡 | Implement handlers category by category | Text → Tabular → Image → Archive → Doc → Media → 3D → Stone | Each handler passes its golden-file tests | Library gaps (e.g. PdfPig vs pdfminer.six on edge fonts) | Text ✅ (Sprint 5), Image ✅ (Sprint 7), Stone hosts ✅ (Sprints 3+6); Tabular / Archive / Doc / Media / 3D / Font / Crypto ⏳ |
-| 6. Stone engine port | 🟡 | UCMSv1/v2/v3 byte-identical with current Vitriol | `Vitriol.Stone` project; Mandelbrot SIMD; music synth port | Stone round-trips byte-identical on every sample, including AES-encrypted | Floating-point divergence in Mandelbrot; PCM rounding in music synth | UCMSv1 + UCMSv3 envelope + AES-CTR + TXT/ZIP/PNG-v1/WAV-v1/AIFF-v1 ✅ (Sprints 3+6); PNG-v3 Mandelbrot, audio-v3 music synth, MKV-v3, 3D-v3 ⏳ |
+| 6. Stone engine port | 🟡 | UCMSv1/v2/v3 byte-identical with current Vitriol | `Vitriol.Stone` project; Mandelbrot SIMD; music synth port | Stone round-trips byte-identical on every sample, including AES-encrypted | Floating-point divergence in Mandelbrot; PCM rounding in music synth | UCMSv1 + UCMSv3 envelope + AES-CTR + TXT/ZIP/WAV-v1/AIFF-v1 ✅ (Sprints 3+6); PNG v1+v3 ✅ (Sprints 3+10, v3 fractal pixel-byte parity with NumPy not guaranteed); audio-v3 music synth, MKV-v3, 3D-v3 ⏳ |
 | 7. Round-trip verifier | ✅ | `IRoundTripVerifier` + structural-equivalence for IR | Implement plus xUnit harness | Verifier runs on every sample, reports byte-equal or specific structural diff | Structural comparator misses semantic equality (e.g. trailing whitespace) | All 5 v1 Stone hosts report `ByteEqual` end-to-end via DI (Sprint 4) |
 | 8. Bootstrap | ⏳ | Port `launcher.py` for FFmpeg/Pandoc/Assimp auto-fetch | `Vitriol.Bootstrap` with HTTPS download + SHA-256 verification + arch detection | Fresh machine bootstraps to working CLI in one command | Upstream URL drift; signature changes | Pin SHA-256 in code, CI fetches and verifies weekly |
 | 9. Parallel run | ⏳ | Run current Vitriol and Vitriol.Net on the same corpus | CI harness that converts every supported `(src_ext, dst_ext)` pair through both implementations | Hash-equal report for Stone/trailer paths; structural-equal report for IR path | Per-format library quirks surface late | Compare SHA-256 (Stone) and IR-structural-equality (IR) for every pair |

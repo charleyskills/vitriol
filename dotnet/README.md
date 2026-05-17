@@ -11,14 +11,15 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 0 | Repo scaffolding | done |
 | 1 | `Vitriol.Core` foundation (IRs, interfaces, adapters) | done |
 | 2 | Detection + Router | done |
-| 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | partial — UCMSv1 + TXT/ZIP/PNG-v1 done; PNG-v3 Mandelbrot deferred |
+| 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | done (UCMSv1 + UCMSv3 + TXT/ZIP/PNG-v1; PNG-v3 added in Sprint 10) |
 | 4 | Round-trip verifier | done |
 | 5 | First IR handler (Text) + `Vitriol.Cli` | done |
 | 6 | Stone audio v1 hosts (WAV + AIFF) | done |
 | 7 | Image handler (`Vitriol.Formats.Image` via SixLabors.ImageSharp) | done |
 | 8 | Tabular handler (`Vitriol.Formats.Tabular`: CSV/TSV via CsvHelper + XLSX via ClosedXML) | done |
 | 9 | Archive handler (`Vitriol.Formats.Archive` via SharpCompress: ZIP/TAR family read+write, 7Z/RAR read-only) | done |
-| 10+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
+| 10 | Stone PNG v3 (Mandelbrot fractal carrier + UCMSv3 LSB scatter-pack) | done |
+| 11+ | Doc / Media subprocess / 3D / Stone audio-v3 music synth + video / Bootstrap | deferred |
 
 ## Build
 
@@ -64,8 +65,9 @@ dotnet run --project Vitriol.Cli -- convert secret.bin carrier.zip --masquerade 
 # Same but inside a PNG (UCMSv1 ucMs chunk)
 dotnet run --project Vitriol.Cli -- convert secret.bin carrier.png --masquerade --verify
 
-# AES-256-encrypted Stone v3 (no oracle on wrong password)
-dotnet run --project Vitriol.Cli -- convert secret.bin carrier.png --masquerade --password chopin
+# AES-256-encrypted Stone v3: encrypted UCMSv3 envelope scatter-packed into a real
+# Mandelbrot fractal. The PNG opens in any viewer as a recognizable fractal image.
+dotnet run --project Vitriol.Cli -- convert secret.bin carrier.png --masquerade --password chopin --verify
 
 vitriol --help
 vitriol convert --help
@@ -82,7 +84,7 @@ dotnet/
 ├── Directory.Packages.props    # Central package management
 ├── .editorconfig               # C# style + analyzer severity
 ├── Vitriol.Core/               # IRs, abstractions, router, detection, registry, 10 routing gates, verifier
-├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/PNG-v1/WAV-v1/AIFF-v1 hosts
+├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/WAV-v1/AIFF-v1 hosts plus PNG v1+v3 (Mandelbrot LSB scatter-pack)
 ├── Vitriol.Formats.Text/       # PlainTextHandler — txt/log/py/xml/html read+write+stream
 ├── Vitriol.Formats.Image/      # ImageMediaHandler — png/jpg/webp/bmp/tiff/gif/pbm/tga via ImageSharp
 ├── Vitriol.Formats.Tabular/    # CsvTextHandler (.csv, .tsv) + XlsxHandler (.xlsx) via CsvHelper + ClosedXML
