@@ -21,6 +21,7 @@
 
   <ItemGroup Label="Image processing (Sprint 3 Stone PNG host and later Sprint 6+ Formats.Image)">
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageVersion Include="System.IO.Hashing" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Test stack">

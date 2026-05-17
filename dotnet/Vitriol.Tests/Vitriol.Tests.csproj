@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+    <ProjectReference Include="..\Vitriol.Stone\Vitriol.Stone.csproj" />
   </ItemGroup>
 
 </Project>

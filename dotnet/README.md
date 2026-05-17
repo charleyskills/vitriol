@@ -11,7 +11,7 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 0 | Repo scaffolding | done |
 | 1 | `Vitriol.Core` foundation (IRs, interfaces, adapters) | done |
 | 2 | Detection + Router | done |
-| 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | not started |
+| 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | partial — UCMSv1 + TXT/ZIP/PNG-v1 done; PNG-v3 Mandelbrot deferred |
 | 4 | Round-trip verifier | not started |
 | 5 | First IR handler (Text) + `Vitriol.Cli` | not started |
 | 6+ | Image / Doc / Media / 3D / Stone audio + video / Bootstrap | deferred |
@@ -41,8 +41,8 @@ dotnet/
 ├── Directory.Build.props       # net10.0, nullable, warnings-as-errors, invariant globalization
 ├── Directory.Packages.props    # Central package management
 ├── .editorconfig               # C# style + analyzer severity
-├── Vitriol.Core/               # Sprint 1+ — IRs, abstractions, router (not yet present)
-├── Vitriol.Stone/              # Sprint 3   — UCMSv* envelope + AES-CTR + carriers (not yet present)
+├── Vitriol.Core/               # IRs, abstractions, router, detection, registry, 7 routing gates
+├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/PNG-v1 hosts
 ├── Vitriol.Formats.Text/       # Sprint 5   — first IR handler (not yet present)
 ├── Vitriol.Cli/                # Sprint 5   — System.CommandLine front-end (not yet present)
 └── Vitriol.Tests/              # Sprint 1+ — xUnit + FsCheck + golden files (not yet present)
