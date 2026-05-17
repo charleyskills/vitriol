@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Core", "Vitriol.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Stone", "Vitriol.Stone\Vitriol.Stone.csproj", "{9CF0562B-4AE7-4B10-9E59-CE6A61EFFE84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Formats.Text", "Vitriol.Formats.Text\Vitriol.Formats.Text.csproj", "{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Cli", "Vitriol.Cli\Vitriol.Cli.csproj", "{BD2D614D-CC8F-4C61-9B2A-40F961F92022}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vitriol.Tests", "Vitriol.Tests\Vitriol.Tests.csproj", "{D92BBFA1-E056-4538-A5B9-79519FA48FFD}"
 EndProject
 Global
@@ -22,6 +26,14 @@ Global
 		{9CF0562B-4AE7-4B10-9E59-CE6A61EFFE84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CF0562B-4AE7-4B10-9E59-CE6A61EFFE84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CF0562B-4AE7-4B10-9E59-CE6A61EFFE84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43A2D792-D4FA-4C48-BC36-E6CD3BEE70D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2D614D-CC8F-4C61-9B2A-40F961F92022}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D92BBFA1-E056-4538-A5B9-79519FA48FFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D92BBFA1-E056-4538-A5B9-79519FA48FFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D92BBFA1-E056-4538-A5B9-79519FA48FFD}.Release|Any CPU.ActiveCfg = Release|Any CPU

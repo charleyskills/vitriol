@@ -60,6 +60,7 @@ public sealed class ConversionRouter : IConversionRouter
                 case RoutingDecision.Handled handled:
                     _logger.LogInformation("Gate {Gate} handled {Src} -> {Dst}",
                         handled.GateName, context.Job.SourceExtension, context.Job.DestinationExtension);
+                    progress?.Report(new ConversionEvent.Stage($"Handled by gate: {handled.GateName}"));
                     return;
                 case RoutingDecision.Refused refused:
                     _logger.LogWarning("Gate {Gate} refused {Src} -> {Dst}: {Reason}",

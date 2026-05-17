@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
     <ProjectReference Include="..\Vitriol.Stone\Vitriol.Stone.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
+    <ProjectReference Include="..\Vitriol.Cli\Vitriol.Cli.csproj" />
   </ItemGroup>
 
 </Project>

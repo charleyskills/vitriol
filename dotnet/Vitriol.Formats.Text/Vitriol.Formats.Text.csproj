@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol.Formats.Text</RootNamespace>
+    <AssemblyName>Vitriol.Formats.Text</AssemblyName>
+    <Description>Plain-text reader/writer (.txt, .log, .py, .xml, .html) for the Vitriol .NET 10 port.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

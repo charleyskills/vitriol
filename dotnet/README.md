@@ -13,7 +13,7 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 2 | Detection + Router | done |
 | 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | partial — UCMSv1 + TXT/ZIP/PNG-v1 done; PNG-v3 Mandelbrot deferred |
 | 4 | Round-trip verifier | done |
-| 5 | First IR handler (Text) + `Vitriol.Cli` | not started |
+| 5 | First IR handler (Text) + `Vitriol.Cli` | done |
 | 6+ | Image / Doc / Media / 3D / Stone audio + video / Bootstrap | deferred |
 
 ## Build
@@ -27,11 +27,32 @@ dotnet build Vitriol.sln
 dotnet test Vitriol.sln
 ```
 
-## Run (once Sprint 5 lands)
+## Run
 
 ```bash
-dotnet run --project Vitriol.Cli -- convert <src> <dst> [--verify] [--password <p>] [--masquerade]
+dotnet run --project Vitriol.Cli -- convert <src> <dst> [--verify] [--password <p>] [--masquerade] [--compiler] [--verbose]
 ```
+
+Examples:
+
+```bash
+# Plain-text pass-through with byte-perfect whitespace preservation
+dotnet run --project Vitriol.Cli -- convert in.txt out.log
+
+# Philosopher's Stone: embed a file inside a ZIP host and verify the round-trip
+dotnet run --project Vitriol.Cli -- convert secret.bin carrier.zip --masquerade --verify
+
+# Same but inside a PNG (UCMSv1 ucMs chunk)
+dotnet run --project Vitriol.Cli -- convert secret.bin carrier.png --masquerade --verify
+
+# AES-256-encrypted Stone v3 (no oracle on wrong password)
+dotnet run --project Vitriol.Cli -- convert secret.bin carrier.png --masquerade --password chopin
+
+vitriol --help
+vitriol convert --help
+```
+
+Exit codes: `0` success · `2` usage · `64` unsupported conversion · `65` verification failed · `70` internal error.
 
 ## Project layout
 
@@ -41,11 +62,11 @@ dotnet/
 ├── Directory.Build.props       # net10.0, nullable, warnings-as-errors, invariant globalization
 ├── Directory.Packages.props    # Central package management
 ├── .editorconfig               # C# style + analyzer severity
-├── Vitriol.Core/               # IRs, abstractions, router, detection, registry, 7 routing gates
+├── Vitriol.Core/               # IRs, abstractions, router, detection, registry, 10 routing gates, verifier
 ├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/PNG-v1 hosts
-├── Vitriol.Formats.Text/       # Sprint 5   — first IR handler (not yet present)
-├── Vitriol.Cli/                # Sprint 5   — System.CommandLine front-end (not yet present)
-└── Vitriol.Tests/              # Sprint 1+ — xUnit + FsCheck + golden files (not yet present)
+├── Vitriol.Formats.Text/       # PlainTextHandler — txt/log/py/xml/html read+write+stream
+├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
+└── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```
 
 ## License

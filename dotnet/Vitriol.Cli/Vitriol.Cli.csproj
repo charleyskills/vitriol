@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Vitriol.Cli</RootNamespace>
+    <AssemblyName>vitriol</AssemblyName>
+    <Description>Vitriol command-line front-end.</Description>
+    <PublishAot>false</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+    <ProjectReference Include="..\Vitriol.Stone\Vitriol.Stone.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Vitriol.Tests" />
+  </ItemGroup>
+
+</Project>
