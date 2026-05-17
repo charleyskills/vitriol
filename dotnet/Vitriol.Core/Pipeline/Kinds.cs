@@ -11,6 +11,13 @@ public enum DocKind
     Binary = 2,
     Archive = 3,
     Pandoc = 4,
+    /// <summary>
+    /// X.509 certificates and asymmetric key material (PEM / DER).
+    /// Self-contained — no <see cref="Vitriol.Core.Ir.Adapters.AdapterRegistry"/>
+    /// entries cross this kind, mirroring Python's <c>DOC_KIND = "crypto"</c>
+    /// isolation in <c>app/format_handlers/crypto_handler.py</c>.
+    /// </summary>
+    Crypto = 5,
 }
 
 /// <summary>

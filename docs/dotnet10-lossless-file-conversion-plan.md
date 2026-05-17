@@ -28,8 +28,9 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | 8 | `Vitriol.Formats.Tabular` — `CsvTextHandler` (.csv/.tsv via CsvHelper) + `XlsxHandler` (.xlsx via ClosedXML). First `DocKind.Tabular` producers/consumers in the port; `TabularToTextDocAdapter` now fires in production via cross-kind CSV → text/markdown/html | ✅ |
 | 9 | `Vitriol.Formats.Archive` — `ArchiveHandler` via SharpCompress. ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ read+write with same-kind byte passthrough and cross-kind repack via SharpCompress's `IReader`/`IWriter`. 7Z/CB7, RAR/CBR, TAR.ZST are read-only. First `DocKind.Archive` producer/consumer in the port. Zip-Slip mitigation included | 🟡 7Z write + TAR.ZST write + RAR write deferred (library / format constraints) |
 | 10 | Stone PNG v3 — Mandelbrot fractal carrier with UCMSv3 LSB scatter-pack. `MandelbrotViewports` (64 curated viewports), `MandelbrotSeed` (port of `derive_seed`), `MandelbrotGenerator` (float32 iteration + three-sin palette), `MandelbrotDims` (tier table), `MandelbrotBitPack` (golden-ratio scatter coprime stride, MSB-first), `MandelbrotPngCodec` (hand-rolled RGB PNG with all 5 filter types on read). `PngStoneHost` dispatches v1 vs v3 by `options.CrossCategory \|\| !Password.IsEmpty`; v3 extract preserves the no-oracle property on wrong password | 🟡 NumPy pixel-byte parity not guaranteed (visual fractal only); LSB scatter positions match Python exactly so cross-implementation payload extract works. Streaming-strip processing for >50 MB payloads deferred |
+| 11 | `Vitriol.Formats.Crypto` — PEM ↔ CRT/CER (DER cert) ↔ KEY (PKCS#8 DER) ↔ DER round trip via BCL `System.Security.Cryptography`. Bundles (cert + key in one PEM) preserved through `CryptoDoc` IR. New `DocKind.Crypto` enum value mirrors Python's isolated `DOC_KIND = "crypto"`. RSA / ECDsa / DSA tried in turn for unknown algorithms; PKCS#1 / SEC1 legacy formats handled. Encrypted private keys out of scope (no password UX) | ✅ |
 
-### Outstanding deferred work (Sprint 11+, no fixed order)
+### Outstanding deferred work (Sprint 12+, no fixed order)
 
 | Area | Status | Notes |
 |---|---|---|
@@ -45,7 +46,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | `Vitriol.Formats.Media` (audio/video via FFMpegCore subprocess wrapper) | ⏳ | Needs `Vitriol.Bootstrap`; mirrors Vitriol's existing FFmpeg codec map |
 | `Vitriol.Formats.Pandoc` (subprocess wrapper for ~50 markup formats) | ⏳ | HTML pivot strategy from Sprint 1 adapter registry |
 | `Vitriol.Formats.Font` (OTF/TTF/WOFF/WOFF2 via SixLabors.Fonts) | ⏳ | Cleanly bounded; fonttools port |
-| `Vitriol.Formats.Crypto` (PEM / CRT / CER / KEY / DER via `System.Security.Cryptography.X509Certificates`) | ⏳ | Built-in BCL; tiny scope |
+| `Vitriol.Formats.Crypto` encrypted-private-key support | ⏳ | Would need a CLI password-prompt UX. Cleartext PEM/DER paths already ship in Sprint 11 |
 | Optional image plugins (AVIF / HEIC / JXL via Magick.NET) | ⏳ | Needs the native ImageMagick binary |
 | SVG read (Svg.Skia) | ⏳ | Read-only, like Vitriol |
 | `Vitriol.Bootstrap` — FFmpeg / Pandoc / Assimp / DejaVu Sans auto-fetch with SHA-256 pinning | ⏳ | Precondition for all subprocess-backed handlers |
@@ -61,6 +62,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 `dotnet/Vitriol.Formats.Image/` ✅ — `ImageMediaHandler` for 8 image format families.
 `dotnet/Vitriol.Formats.Tabular/` 🟡 — `CsvTextHandler` (.csv/.tsv) + `XlsxHandler` (.xlsx); Parquet/Feather/ORC deferred.
 `dotnet/Vitriol.Formats.Archive/` 🟡 — `ArchiveHandler` covers ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ read+write and 7Z/CB7/TAR.ZST/RAR read-only; 7Z/TAR.ZST/RAR write deferred.
+`dotnet/Vitriol.Formats.Crypto/` ✅ — `CryptoHandler` for PEM/CRT/CER/KEY/DER via BCL; cleartext only.
 `dotnet/Vitriol.Cli/` ✅ — `vitriol convert` end-to-end with verification.
 `dotnet/Vitriol.Tests/` ✅ — ~100 xUnit + FsCheck + Shouldly tests covering everything above.
 

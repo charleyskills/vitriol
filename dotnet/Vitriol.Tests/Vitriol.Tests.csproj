@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Vitriol.Formats.Image\Vitriol.Formats.Image.csproj" />
     <ProjectReference Include="..\Vitriol.Formats.Tabular\Vitriol.Formats.Tabular.csproj" />
     <ProjectReference Include="..\Vitriol.Formats.Archive\Vitriol.Formats.Archive.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Crypto\Vitriol.Formats.Crypto.csproj" />
     <ProjectReference Include="..\Vitriol.Cli\Vitriol.Cli.csproj" />
   </ItemGroup>
 

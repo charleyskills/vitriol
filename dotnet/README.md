@@ -19,7 +19,8 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 8 | Tabular handler (`Vitriol.Formats.Tabular`: CSV/TSV via CsvHelper + XLSX via ClosedXML) | done |
 | 9 | Archive handler (`Vitriol.Formats.Archive` via SharpCompress: ZIP/TAR family read+write, 7Z/RAR read-only) | done |
 | 10 | Stone PNG v3 (Mandelbrot fractal carrier + UCMSv3 LSB scatter-pack) | done |
-| 11+ | Doc / Media subprocess / 3D / Stone audio-v3 music synth + video / Bootstrap | deferred |
+| 11 | Crypto handler (`Vitriol.Formats.Crypto`: PEM ↔ CRT ↔ CER ↔ KEY ↔ DER via BCL `System.Security.Cryptography`) | done |
+| 12+ | Doc / Media subprocess / 3D / Stone audio-v3 music synth + video / Bootstrap | deferred |
 
 ## Build
 
@@ -56,6 +57,10 @@ dotnet run --project Vitriol.Cli -- convert sales.csv summary.html
 dotnet run --project Vitriol.Cli -- convert backup.cbz backup.tar.gz
 dotnet run --project Vitriol.Cli -- convert legacy.7z legacy.zip   # 7Z read-only; cross-kind only
 
+# X.509 certificate / key format conversions
+dotnet run --project Vitriol.Cli -- convert server.pem server.crt    # PEM cert → DER cert
+dotnet run --project Vitriol.Cli -- convert key.der key.pem          # DER key → PEM PKCS#8
+
 # Plain-text pass-through with byte-perfect whitespace preservation
 dotnet run --project Vitriol.Cli -- convert in.txt out.log
 
@@ -89,6 +94,7 @@ dotnet/
 ├── Vitriol.Formats.Image/      # ImageMediaHandler — png/jpg/webp/bmp/tiff/gif/pbm/tga via ImageSharp
 ├── Vitriol.Formats.Tabular/    # CsvTextHandler (.csv, .tsv) + XlsxHandler (.xlsx) via CsvHelper + ClosedXML
 ├── Vitriol.Formats.Archive/    # ArchiveHandler — zip/cbz/7z/cb7/tar/tar.gz/tar.bz2/tar.xz/tar.zst/rar via SharpCompress
+├── Vitriol.Formats.Crypto/     # CryptoHandler — pem/crt/cer/key/der via BCL System.Security.Cryptography
 ├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
 └── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```
