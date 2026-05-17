@@ -29,10 +29,12 @@ Requires the **.NET 10 SDK** (preview channel). Install via [dot.net](https://do
 
 ```bash
 cd dotnet
-dotnet restore Vitriol.sln
-dotnet build Vitriol.sln
-dotnet test Vitriol.sln
+dotnet restore Vitriol.slnx
+dotnet build Vitriol.slnx
+dotnet test Vitriol.slnx
 ```
+
+The solution uses the XML-based **`.slnx`** format (introduced in .NET 9, fully supported in .NET 10) — no GUIDs, just project paths.
 
 ## Run
 
@@ -95,7 +97,7 @@ Exit codes: `0` success · `2` usage · `64` unsupported conversion · `65` veri
 
 ```
 dotnet/
-├── Vitriol.sln                 # Solution
+├── Vitriol.slnx                # Solution (XML-based .slnx format)
 ├── Directory.Build.props       # net10.0, nullable, warnings-as-errors, invariant globalization
 ├── Directory.Packages.props    # Central package management
 ├── .editorconfig               # C# style + analyzer severity

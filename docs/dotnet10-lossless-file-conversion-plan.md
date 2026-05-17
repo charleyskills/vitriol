@@ -334,7 +334,7 @@ The router's **symmetry guarantee is real for Stone and trailer paths, structura
 ### 7.1 Project layout
 
 ```
-Vitriol.sln
+Vitriol.slnx
 ├── Vitriol.Core/           # IRs, abstractions, router, cancellation, options
 ├── Vitriol.Formats.Text/   # txt, log, py, xml, html, markdown, rtf
 ├── Vitriol.Formats.Tabular/# csv, tsv, xlsx, parquet, feather, orc, vcf

@@ -42,13 +42,13 @@ jobs:
         run: dotnet --info
 
       - name: Restore
-        run: dotnet restore Vitriol.sln
+        run: dotnet restore Vitriol.slnx
 
       - name: Build
-        run: dotnet build Vitriol.sln --configuration Release --no-restore
+        run: dotnet build Vitriol.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test Vitriol.sln --configuration Release --no-build --logger "trx" --results-directory TestResults
+        run: dotnet test Vitriol.slnx --configuration Release --no-build --logger "trx" --results-directory TestResults
 
       - name: Upload test results
         if: always()

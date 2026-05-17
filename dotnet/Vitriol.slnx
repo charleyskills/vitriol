@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="Vitriol.Core/Vitriol.Core.csproj" />
+  <Project Path="Vitriol.Stone/Vitriol.Stone.csproj" />
+  <Project Path="Vitriol.Formats.Text/Vitriol.Formats.Text.csproj" />
+  <Project Path="Vitriol.Formats.Image/Vitriol.Formats.Image.csproj" />
+  <Project Path="Vitriol.Formats.Tabular/Vitriol.Formats.Tabular.csproj" />
+  <Project Path="Vitriol.Formats.Archive/Vitriol.Formats.Archive.csproj" />
+  <Project Path="Vitriol.Formats.Crypto/Vitriol.Formats.Crypto.csproj" />
+  <Project Path="Vitriol.Formats.Doc/Vitriol.Formats.Doc.csproj" />
+  <Project Path="Vitriol.Cli/Vitriol.Cli.csproj" />
+  <Project Path="Vitriol.Tests/Vitriol.Tests.csproj" />
+</Solution>
