@@ -68,6 +68,7 @@ public sealed class WholeFileIrGate : IRoutingGate
         {
             Password = context.Job.Password,
             Progress = context.Progress,
+            SourceHint = context.Job.Source,
         };
         await using (FileStream src = File.OpenRead(context.Job.Source))
         {

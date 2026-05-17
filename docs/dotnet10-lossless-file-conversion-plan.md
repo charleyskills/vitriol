@@ -25,8 +25,9 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | 5 | `Vitriol.Formats.Text` (`PlainTextHandler` reader+writer+stream-converter, BOM-aware `EncodingDetector` with non-UTF-8 warning) + `Vitriol.Cli` (`convert <src> <dst>` with `--verify`/`--masquerade`/`--password`/`--compiler`) | ✅ |
 | 6 | Stone audio v1 hosts — `WavStoneHost` (RIFF data chunk) + `AiffStoneHost` (FORM/SSND with IEEE 754 80-bit extended-float sample rate) | 🟡 v3 music-synth variants deferred |
 | 7 | `Vitriol.Formats.Image` — first `IMediaHandler` via SixLabors.ImageSharp; covers PNG/JPG/WebP/BMP/TIFF/GIF/PBM/TGA. Lights up `SameMediaHandlerGate` and `CrossCategoryImageToDocumentGate` (origin sidecar path) | ✅ |
+| 8 | `Vitriol.Formats.Tabular` — `CsvTextHandler` (.csv/.tsv via CsvHelper) + `XlsxHandler` (.xlsx via ClosedXML). First `DocKind.Tabular` producers/consumers in the port; `TabularToTextDocAdapter` now fires in production via cross-kind CSV → text/markdown/html | ✅ |
 
-### Outstanding deferred work (Sprint 8+, no fixed order)
+### Outstanding deferred work (Sprint 9+, no fixed order)
 
 | Area | Status | Notes |
 |---|---|---|
@@ -35,7 +36,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | Stone video v3 (MKV animated Mandelbrot at 30 fps, payload in pixel LSBs) | ⏳ | Highest complexity in the Stone catalogue; needs FFmpeg frame pipe |
 | Stone 3D v3 (PLY / OBJ / GLB envelope embedding) | ⏳ | Format-aware byte stuffing; modest scope |
 | Self-extracting `.py` / `.exe` Stone outputs | ⏳ | Port of `tools/selfextract_stub.py` + `tools/build_selfextract_stub.py` |
-| `Vitriol.Formats.Tabular` (CSV/TSV via CsvHelper, XLSX via ClosedXML, Parquet/Feather/ORC via Apache.Arrow) | ⏳ | Exercises `DocKind.Tabular` path and the Sprint 1 `TabularToTextDoc` adapters |
+| `Vitriol.Formats.Tabular` Parquet / Feather / ORC (via Apache.Arrow + Parquet.Net) | ⏳ | Columnar binary; first-row-as-header semantics differ from CSV/XLSX. CSV/TSV/XLSX already shipped in Sprint 8 |
 | `Vitriol.Formats.Doc` (DOCX via DocumentFormat.OpenXml, PDF read via PdfPig, PDF write via QuestPDF, EPUB via VersOne.Epub) | ⏳ | Largest single sprint; trailer-envelope sidecar lands here |
 | `Vitriol.Formats.Archive` (ZIP / 7Z / TAR family via System.IO.Compression + SharpCompress) | ⏳ | Fully managed, clean scope |
 | `Vitriol.Formats.Model` (3D via AssimpNet wrapping the Assimp DLL) | ⏳ | Needs `Vitriol.Bootstrap` to fetch the native binary |
@@ -56,6 +57,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 `dotnet/Vitriol.Stone/` 🟡 — envelope + crypto + 5 of ~10 carrier hosts (TXT, ZIP, PNG-v1, WAV-v1, AIFF-v1).
 `dotnet/Vitriol.Formats.Text/` ✅ — `PlainTextHandler` for .txt/.log/.py/.xml/.html.
 `dotnet/Vitriol.Formats.Image/` ✅ — `ImageMediaHandler` for 8 image format families.
+`dotnet/Vitriol.Formats.Tabular/` 🟡 — `CsvTextHandler` (.csv/.tsv) + `XlsxHandler` (.xlsx); Parquet/Feather/ORC deferred.
 `dotnet/Vitriol.Cli/` ✅ — `vitriol convert` end-to-end with verification.
 `dotnet/Vitriol.Tests/` ✅ — ~100 xUnit + FsCheck + Shouldly tests covering everything above.
 

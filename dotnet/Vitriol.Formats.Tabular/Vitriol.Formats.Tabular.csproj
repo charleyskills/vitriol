@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol.Formats.Tabular</RootNamespace>
+    <AssemblyName>Vitriol.Formats.Tabular</AssemblyName>
+    <Description>CSV / TSV / XLSX readers and writers for the Vitriol .NET 10 port.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="ClosedXML" />
+  </ItemGroup>
+
+</Project>

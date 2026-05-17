@@ -16,7 +16,8 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 5 | First IR handler (Text) + `Vitriol.Cli` | done |
 | 6 | Stone audio v1 hosts (WAV + AIFF) | done |
 | 7 | Image handler (`Vitriol.Formats.Image` via SixLabors.ImageSharp) | done |
-| 8+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
+| 8 | Tabular handler (`Vitriol.Formats.Tabular`: CSV/TSV via CsvHelper + XLSX via ClosedXML) | done |
+| 9+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
 
 ## Build
 
@@ -41,6 +42,13 @@ Examples:
 # Image transcoding via SixLabors.ImageSharp (same-handler media path)
 dotnet run --project Vitriol.Cli -- convert photo.png photo.jpg
 dotnet run --project Vitriol.Cli -- convert photo.png photo.webp
+
+# Tabular conversions (single-sheet round trip + multi-sheet drop warning)
+dotnet run --project Vitriol.Cli -- convert data.csv data.xlsx
+dotnet run --project Vitriol.Cli -- convert workbook.xlsx out.csv   # warns about dropped sheets
+
+# Cross-kind: CSV → text-flavoured destination engages the tabular→textdoc adapter
+dotnet run --project Vitriol.Cli -- convert sales.csv summary.html
 
 # Plain-text pass-through with byte-perfect whitespace preservation
 dotnet run --project Vitriol.Cli -- convert in.txt out.log
@@ -72,6 +80,7 @@ dotnet/
 ├── Vitriol.Stone/              # UCMSv1/v3 envelope, AES-256-CTR, TXT/ZIP/PNG-v1/WAV-v1/AIFF-v1 hosts
 ├── Vitriol.Formats.Text/       # PlainTextHandler — txt/log/py/xml/html read+write+stream
 ├── Vitriol.Formats.Image/      # ImageMediaHandler — png/jpg/webp/bmp/tiff/gif/pbm/tga via ImageSharp
+├── Vitriol.Formats.Tabular/    # CsvTextHandler (.csv, .tsv) + XlsxHandler (.xlsx) via CsvHelper + ClosedXML
 ├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
 └── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```

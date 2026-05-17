@@ -6,6 +6,14 @@ public sealed record ReadContext(string Extension)
     public ReadOnlyMemory<byte> Password { get; init; }
 
     public IProgress<ConversionEvent>? Progress { get; init; }
+
+    /// <summary>
+    /// Original source path, when available. Handlers that key on the
+    /// filename (e.g. <c>CsvTextHandler</c> deriving the sheet name from
+    /// <c>Path.GetFileNameWithoutExtension</c>) read this. Optional;
+    /// <c>null</c> when the source is a non-file stream.
+    /// </summary>
+    public string? SourceHint { get; init; }
 }
 
 /// <summary>Context for an <see cref="IFormatWriter"/> call.</summary>

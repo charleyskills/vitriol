@@ -53,8 +53,11 @@ public sealed class TabularToTextDocAdapter : IDocumentAdapter<Tabular, TextDoc>
     /// Type-aware cell formatting. Unlike Vitriol's <c>str(c.value)</c> at
     /// <c>intermediate.py:116</c>, this preserves <see cref="decimal"/>
     /// precision and uses invariant culture.
+    /// <see cref="InternalsVisibleTo"/> exposes this to
+    /// <c>Vitriol.Formats.Tabular</c> so the CSV writer reuses the same
+    /// precision-sensitive formatting.
     /// </summary>
-    private static string FormatCell(object? value) => value switch
+    internal static string FormatCell(object? value) => value switch
     {
         null => string.Empty,
         string s => s,

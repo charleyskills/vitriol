@@ -6,6 +6,7 @@ using Vitriol.Core.Pipeline;
 using Vitriol.Core.Registry;
 using Vitriol.Core.Verification;
 using Vitriol.Formats.Image;
+using Vitriol.Formats.Tabular;
 using Vitriol.Formats.Text;
 using Vitriol.Stone;
 
@@ -190,6 +191,7 @@ public sealed class ConvertCommand
         services.AddVitriolStone();
         services.AddVitriolText();
         services.AddVitriolImage();
+        services.AddVitriolTabular();
         return services.BuildServiceProvider();
     }
 
