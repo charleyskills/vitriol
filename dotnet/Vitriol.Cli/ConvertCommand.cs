@@ -5,6 +5,7 @@ using Vitriol.Core.Detection;
 using Vitriol.Core.Pipeline;
 using Vitriol.Core.Registry;
 using Vitriol.Core.Verification;
+using Vitriol.Formats.Archive;
 using Vitriol.Formats.Image;
 using Vitriol.Formats.Tabular;
 using Vitriol.Formats.Text;
@@ -192,6 +193,7 @@ public sealed class ConvertCommand
         services.AddVitriolText();
         services.AddVitriolImage();
         services.AddVitriolTabular();
+        services.AddVitriolArchive();
         return services.BuildServiceProvider();
     }
 

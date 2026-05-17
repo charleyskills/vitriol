@@ -14,6 +14,7 @@
     <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
     <ProjectReference Include="..\Vitriol.Formats.Image\Vitriol.Formats.Image.csproj" />
     <ProjectReference Include="..\Vitriol.Formats.Tabular\Vitriol.Formats.Tabular.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Archive\Vitriol.Formats.Archive.csproj" />
   </ItemGroup>
 
   <ItemGroup>

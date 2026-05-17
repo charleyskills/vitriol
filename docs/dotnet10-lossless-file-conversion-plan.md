@@ -26,8 +26,9 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | 6 | Stone audio v1 hosts — `WavStoneHost` (RIFF data chunk) + `AiffStoneHost` (FORM/SSND with IEEE 754 80-bit extended-float sample rate) | 🟡 v3 music-synth variants deferred |
 | 7 | `Vitriol.Formats.Image` — first `IMediaHandler` via SixLabors.ImageSharp; covers PNG/JPG/WebP/BMP/TIFF/GIF/PBM/TGA. Lights up `SameMediaHandlerGate` and `CrossCategoryImageToDocumentGate` (origin sidecar path) | ✅ |
 | 8 | `Vitriol.Formats.Tabular` — `CsvTextHandler` (.csv/.tsv via CsvHelper) + `XlsxHandler` (.xlsx via ClosedXML). First `DocKind.Tabular` producers/consumers in the port; `TabularToTextDocAdapter` now fires in production via cross-kind CSV → text/markdown/html | ✅ |
+| 9 | `Vitriol.Formats.Archive` — `ArchiveHandler` via SharpCompress. ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ read+write with same-kind byte passthrough and cross-kind repack via SharpCompress's `IReader`/`IWriter`. 7Z/CB7, RAR/CBR, TAR.ZST are read-only. First `DocKind.Archive` producer/consumer in the port. Zip-Slip mitigation included | 🟡 7Z write + TAR.ZST write + RAR write deferred (library / format constraints) |
 
-### Outstanding deferred work (Sprint 9+, no fixed order)
+### Outstanding deferred work (Sprint 10+, no fixed order)
 
 | Area | Status | Notes |
 |---|---|---|
@@ -38,7 +39,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 | Self-extracting `.py` / `.exe` Stone outputs | ⏳ | Port of `tools/selfextract_stub.py` + `tools/build_selfextract_stub.py` |
 | `Vitriol.Formats.Tabular` Parquet / Feather / ORC (via Apache.Arrow + Parquet.Net) | ⏳ | Columnar binary; first-row-as-header semantics differ from CSV/XLSX. CSV/TSV/XLSX already shipped in Sprint 8 |
 | `Vitriol.Formats.Doc` (DOCX via DocumentFormat.OpenXml, PDF read via PdfPig, PDF write via QuestPDF, EPUB via VersOne.Epub) | ⏳ | Largest single sprint; trailer-envelope sidecar lands here |
-| `Vitriol.Formats.Archive` (ZIP / 7Z / TAR family via System.IO.Compression + SharpCompress) | ⏳ | Fully managed, clean scope |
+| `Vitriol.Formats.Archive` — 7Z write + TAR.ZST write + RAR write | ⏳ | Library/format constraints prevent these in the .NET port today. ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ already ship in Sprint 9; 7Z/RAR read also work |
 | `Vitriol.Formats.Model` (3D via AssimpNet wrapping the Assimp DLL) | ⏳ | Needs `Vitriol.Bootstrap` to fetch the native binary |
 | `Vitriol.Formats.Media` (audio/video via FFMpegCore subprocess wrapper) | ⏳ | Needs `Vitriol.Bootstrap`; mirrors Vitriol's existing FFmpeg codec map |
 | `Vitriol.Formats.Pandoc` (subprocess wrapper for ~50 markup formats) | ⏳ | HTML pivot strategy from Sprint 1 adapter registry |
@@ -58,6 +59,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred
 `dotnet/Vitriol.Formats.Text/` ✅ — `PlainTextHandler` for .txt/.log/.py/.xml/.html.
 `dotnet/Vitriol.Formats.Image/` ✅ — `ImageMediaHandler` for 8 image format families.
 `dotnet/Vitriol.Formats.Tabular/` 🟡 — `CsvTextHandler` (.csv/.tsv) + `XlsxHandler` (.xlsx); Parquet/Feather/ORC deferred.
+`dotnet/Vitriol.Formats.Archive/` 🟡 — `ArchiveHandler` covers ZIP/CBZ/TAR/TAR.GZ/TAR.BZ2/TAR.XZ read+write and 7Z/CB7/TAR.ZST/RAR read-only; 7Z/TAR.ZST/RAR write deferred.
 `dotnet/Vitriol.Cli/` ✅ — `vitriol convert` end-to-end with verification.
 `dotnet/Vitriol.Tests/` ✅ — ~100 xUnit + FsCheck + Shouldly tests covering everything above.
 

@@ -17,7 +17,8 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 6 | Stone audio v1 hosts (WAV + AIFF) | done |
 | 7 | Image handler (`Vitriol.Formats.Image` via SixLabors.ImageSharp) | done |
 | 8 | Tabular handler (`Vitriol.Formats.Tabular`: CSV/TSV via CsvHelper + XLSX via ClosedXML) | done |
-| 9+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
+| 9 | Archive handler (`Vitriol.Formats.Archive` via SharpCompress: ZIP/TAR family read+write, 7Z/RAR read-only) | done |
+| 10+ | Doc / Media subprocess / 3D / Stone PNG-v3 + audio-v3 music synth + video / Bootstrap | deferred |
 
 ## Build
 
@@ -50,6 +51,10 @@ dotnet run --project Vitriol.Cli -- convert workbook.xlsx out.csv   # warns abou
 # Cross-kind: CSV → text-flavoured destination engages the tabular→textdoc adapter
 dotnet run --project Vitriol.Cli -- convert sales.csv summary.html
 
+# Archive conversions (cross-format repack + same-kind byte passthrough via .cbz alias)
+dotnet run --project Vitriol.Cli -- convert backup.cbz backup.tar.gz
+dotnet run --project Vitriol.Cli -- convert legacy.7z legacy.zip   # 7Z read-only; cross-kind only
+
 # Plain-text pass-through with byte-perfect whitespace preservation
 dotnet run --project Vitriol.Cli -- convert in.txt out.log
 
@@ -81,6 +86,7 @@ dotnet/
 ├── Vitriol.Formats.Text/       # PlainTextHandler — txt/log/py/xml/html read+write+stream
 ├── Vitriol.Formats.Image/      # ImageMediaHandler — png/jpg/webp/bmp/tiff/gif/pbm/tga via ImageSharp
 ├── Vitriol.Formats.Tabular/    # CsvTextHandler (.csv, .tsv) + XlsxHandler (.xlsx) via CsvHelper + ClosedXML
+├── Vitriol.Formats.Archive/    # ArchiveHandler — zip/cbz/7z/cb7/tar/tar.gz/tar.bz2/tar.xz/tar.zst/rar via SharpCompress
 ├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
 └── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```
