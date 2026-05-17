@@ -269,6 +269,12 @@ The `.md` references images by relative paths (`![alt](images/image1.png)`). Pur
 
 <br></br>
 
+## .NET 10 port (in progress)
+
+A .NET 10 C# re-architecture of the conversion engine lives under [`dotnet/`](dotnet/). It is scoped to a class library plus CLI front-end (no GUI). See the design and migration plan at [`docs/dotnet10-lossless-file-conversion-plan.md`](docs/dotnet10-lossless-file-conversion-plan.md) and the in-progress task list inside the `dotnet/` directory.
+
+<br></br>
+
 ## License
 
 **Elastic License** — see [LICENSE](LICENSE).
