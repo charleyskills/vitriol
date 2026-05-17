@@ -31,6 +31,7 @@ public sealed class ConvertCommand
         bool Masquerade = false,
         bool Compiler = false,
         bool Verbose = false,
+        bool RequirePassword = false,
         string? Password = null);
 
     public static (Args? Parsed, string? Error) Parse(string[] argv)
@@ -41,6 +42,7 @@ public sealed class ConvertCommand
         bool masquerade = false;
         bool compiler = false;
         bool verbose = false;
+        bool requirePassword = false;
         string? password = null;
 
         for (int i = 0; i < argv.Length; i++)
@@ -61,6 +63,9 @@ public sealed class ConvertCommand
                     break;
                 case "--verbose":
                     verbose = true;
+                    break;
+                case "--require-password":
+                    requirePassword = true;
                     break;
                 case "--password":
                 case "-p":
@@ -90,7 +95,7 @@ public sealed class ConvertCommand
             return (null, "convert requires <src> and <dst> paths");
         }
 
-        return (new Args(src, dst, verify, masquerade, compiler, verbose, password), null);
+        return (new Args(src, dst, verify, masquerade, compiler, verbose, requirePassword, password), null);
     }
 
     /// <summary>
@@ -111,6 +116,13 @@ public sealed class ConvertCommand
         if (!File.Exists(parsed.Source))
         {
             stderr.WriteLine($"vitriol convert: source not found: {parsed.Source}");
+            return ExitCodes.Usage;
+        }
+
+        if (parsed.RequirePassword && parsed.Password is null)
+        {
+            stderr.WriteLine("vitriol convert: --require-password was set but no --password supplied");
+            PrintUsage(stderr);
             return ExitCodes.Usage;
         }
 
@@ -212,6 +224,7 @@ public sealed class ConvertCommand
         stderr.WriteLine("options:");
         stderr.WriteLine("  -v, --verify              forward+reverse round-trip with SHA-256 compare");
         stderr.WriteLine("  -p, --password <secret>   password for Stone v3 encrypted carriers");
+        stderr.WriteLine("      --require-password    refuse to run without --password (defense against accidental plaintext output)");
         stderr.WriteLine("  -m, --masquerade          engage Philosopher's Stone for this conversion");
         stderr.WriteLine("      --compiler            embed source into a self-extracting .py (target=.py)");
         stderr.WriteLine("      --verbose             print stage / progress events to stderr");

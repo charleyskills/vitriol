@@ -85,6 +85,12 @@ dotnet run --project Vitriol.Cli -- convert hidden.png recovered.bin --password 
 # Wrong --password produces silent garbage (no oracle), so don't lose it.
 # --password implies --masquerade.
 
+# Defensive: refuse to produce a Stone carrier without a password. Useful
+# when scripting a "always encrypt" workflow — guards against accidentally
+# omitting --password and silently emitting a plaintext UCMSv1 envelope.
+dotnet run --project Vitriol.Cli -- convert plaintext.bin hidden.png --require-password --password chopin --verify
+# (omitting --password with --require-password set exits with usage error)
+
 # THE headline new property: trailer-envelope byte-perfect round trip
 dotnet run --project Vitriol.Cli -- convert photo.png photo.docx --verify
 # Forward writes a DOCX containing photo's bytes stashed at _vitriol/original.bin.

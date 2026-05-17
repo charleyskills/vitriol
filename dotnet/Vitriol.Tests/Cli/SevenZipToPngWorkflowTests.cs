@@ -118,6 +118,59 @@ public sealed class SevenZipToPngWorkflowTests : IDisposable
         recovered.ShouldNotBe(sevenZipBytes);
     }
 
+    [Fact]
+    public async Task Require_password_without_password_returns_usage_error()
+    {
+        // --require-password is a defensive flag: refuse to run a Stone
+        // conversion silently in plaintext if the user forgot --password.
+        byte[] sevenZipBytes = BuildFakeSevenZipBytes(seed: 99, lengthBytes: 512);
+
+        string dir = MakeScope();
+        string sourcePath = Path.Combine(dir, "input.7z");
+        string carrierPath = Path.Combine(dir, "carrier.png");
+        await File.WriteAllBytesAsync(sourcePath, sevenZipBytes);
+
+        StringBuilder stderr = new();
+        using StringWriter sw = new(stderr);
+
+        int code = await ConvertCommand.RunAsync(
+            new[] { sourcePath, carrierPath, "--require-password" },
+            sw, default);
+
+        code.ShouldBe(ExitCodes.Usage);
+        stderr.ToString().ShouldContain("--require-password");
+        File.Exists(carrierPath).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Require_password_with_password_proceeds_normally()
+    {
+        byte[] sevenZipBytes = BuildFakeSevenZipBytes(seed: 101, lengthBytes: 1024);
+
+        string dir = MakeScope();
+        string sourcePath = Path.Combine(dir, "input.7z");
+        string carrierPath = Path.Combine(dir, "carrier.png");
+        string recoveredPath = Path.Combine(dir, "recovered.7z");
+        await File.WriteAllBytesAsync(sourcePath, sevenZipBytes);
+
+        StringBuilder stderr = new();
+        using StringWriter sw = new(stderr);
+
+        int forwardCode = await ConvertCommand.RunAsync(
+            new[] { sourcePath, carrierPath, "--require-password", "--password", "chopin" },
+            sw, default);
+        forwardCode.ShouldBe(ExitCodes.Success);
+        File.Exists(carrierPath).ShouldBeTrue();
+
+        int reverseCode = await ConvertCommand.RunAsync(
+            new[] { carrierPath, recoveredPath, "--require-password", "--password", "chopin" },
+            sw, default);
+        reverseCode.ShouldBe(ExitCodes.Success);
+
+        byte[] recovered = await File.ReadAllBytesAsync(recoveredPath);
+        recovered.ShouldBe(sevenZipBytes);
+    }
+
     /// <summary>
     /// Constructs deterministic bytes with the 7-Zip magic prefix so the
     /// produced file is shape-identical to a real 7z. Vitriol treats the
