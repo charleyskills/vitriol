@@ -20,7 +20,8 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 | 9 | Archive handler (`Vitriol.Formats.Archive` via SharpCompress: ZIP/TAR family read+write, 7Z/RAR read-only) | done |
 | 10 | Stone PNG v3 (Mandelbrot fractal carrier + UCMSv3 LSB scatter-pack) | done |
 | 11 | Crypto handler (`Vitriol.Formats.Crypto`: PEM ↔ CRT ↔ CER ↔ KEY ↔ DER via BCL `System.Security.Cryptography`) | done |
-| 12+ | Doc / Media subprocess / 3D / Stone audio-v3 music synth + video / Bootstrap | deferred |
+| 12 | Doc handler (`Vitriol.Formats.Doc`: DOCX via OpenXml + PDF via PdfPig/QuestPDF + Markdown via Markdig); trailer-envelope sidecar lights up the Sprint 2 `TrailerEnvelopeGate` for the first time | done |
+| 13+ | EPUB / ODT / PPTX / RTF / Media subprocess / 3D / Bootstrap | deferred |
 
 ## Build
 
@@ -61,6 +62,16 @@ dotnet run --project Vitriol.Cli -- convert legacy.7z legacy.zip   # 7Z read-onl
 dotnet run --project Vitriol.Cli -- convert server.pem server.crt    # PEM cert → DER cert
 dotnet run --project Vitriol.Cli -- convert key.der key.pem          # DER key → PEM PKCS#8
 
+# Document conversions
+dotnet run --project Vitriol.Cli -- convert notes.docx notes.md       # DOCX → Markdown
+dotnet run --project Vitriol.Cli -- convert paper.pdf paper.md        # PDF → Markdown (warns on scanned/empty PDFs)
+dotnet run --project Vitriol.Cli -- convert article.md article.docx   # Markdown → DOCX
+
+# THE headline new property: trailer-envelope byte-perfect round trip
+dotnet run --project Vitriol.Cli -- convert photo.png photo.docx --verify
+# Forward writes a DOCX containing photo's bytes stashed at _vitriol/original.bin.
+# Reverse reads the trailer, recovers photo bytes exactly. --verify confirms.
+
 # Plain-text pass-through with byte-perfect whitespace preservation
 dotnet run --project Vitriol.Cli -- convert in.txt out.log
 
@@ -95,6 +106,8 @@ dotnet/
 ├── Vitriol.Formats.Tabular/    # CsvTextHandler (.csv, .tsv) + XlsxHandler (.xlsx) via CsvHelper + ClosedXML
 ├── Vitriol.Formats.Archive/    # ArchiveHandler — zip/cbz/7z/cb7/tar/tar.gz/tar.bz2/tar.xz/tar.zst/rar via SharpCompress
 ├── Vitriol.Formats.Crypto/     # CryptoHandler — pem/crt/cer/key/der via BCL System.Security.Cryptography
+├── Vitriol.Formats.Doc/        # DocxHandler + PdfHandler + MarkdownHandler with trailer-envelope sidecar
+│                               # (OpenXml + PdfPig/QuestPDF + Markdig)
 ├── Vitriol.Cli/                # vitriol convert <src> <dst> hand-rolled arg parser, DI host
 └── Vitriol.Tests/              # xUnit + FsCheck + Shouldly — ~80 tests
 ```

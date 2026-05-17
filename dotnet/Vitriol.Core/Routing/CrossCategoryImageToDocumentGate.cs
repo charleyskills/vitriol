@@ -74,6 +74,7 @@ public sealed class CrossCategoryImageToDocumentGate : IRoutingGate
         WriteContext writeContext = new(context.Job.DestinationExtension)
         {
             Progress = context.Progress,
+            DestinationHint = context.Job.Destination,
         };
 
         await using FileStream dst = File.Create(context.Job.Destination);

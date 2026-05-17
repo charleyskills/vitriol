@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol.Formats.Doc</RootNamespace>
+    <AssemblyName>Vitriol.Formats.Doc</AssemblyName>
+    <Description>Document handlers (DOCX / PDF / Markdown) for the Vitriol .NET 10 port with trailer-envelope sidecars.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+    <ProjectReference Include="..\Vitriol.Stone\Vitriol.Stone.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="QuestPDF" />
+    <PackageReference Include="Markdig" />
+  </ItemGroup>
+
+</Project>
