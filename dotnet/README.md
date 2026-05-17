@@ -10,7 +10,7 @@ This is an **in-progress port**. See the design document at [`../docs/dotnet10-l
 |---|---|---|
 | 0 | Repo scaffolding | done |
 | 1 | `Vitriol.Core` foundation (IRs, interfaces, adapters) | done |
-| 2 | Detection + Router | not started |
+| 2 | Detection + Router | done |
 | 3 | Stone envelope + crypto + TXT/ZIP/PNG hosts | not started |
 | 4 | Round-trip verifier | not started |
 | 5 | First IR handler (Text) + `Vitriol.Cli` | not started |

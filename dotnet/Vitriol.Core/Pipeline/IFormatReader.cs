@@ -13,12 +13,5 @@ public interface IFormatReader
 
     IReadOnlySet<string> SupportedExtensions { get; }
 
-    /// <summary>
-    /// True if this reader can stream the given <c>(src, dst)</c> pair without
-    /// materializing the full document in memory. Mirrors the
-    /// <c>can_stream(src_ext, dst_ext)</c> hook in the Python handlers.
-    /// </summary>
-    bool CanStream(string sourceExtension, string destinationExtension) => false;
-
     ValueTask<IDocument> ReadAsync(Stream input, ReadContext context, CancellationToken cancellationToken);
 }
