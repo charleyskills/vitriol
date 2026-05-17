@@ -9,6 +9,58 @@
 
 ---
 
+## 0. Execution Status
+
+Legend: ✅ done · 🟡 partial · ⏳ deferred
+
+### Sprints delivered (commits on `claude/file-conversion-dotnet10-analysis-bLfwr`)
+
+| Sprint | Scope | Status |
+|---|---|---|
+| 0 | Repo scaffolding (`dotnet/` solution, Directory.Build.props, central package mgmt, .editorconfig, CI workflow) | ✅ |
+| 1 | `Vitriol.Core` foundation — IR records, EquatableArray/EquatableDictionary, all interfaces, IR adapters | ✅ |
+| 2 | Detection (`ExtensionNormalizer`, `FormatDetector`, `MagicByteSniffer`, `ZipSubtypeSniffer`) + 10-gate `ConversionRouter` + `FormatRegistry` + `KnownExtensions` | ✅ |
+| 3 | `Vitriol.Stone` — UCMSv1 + UCMSv3 envelope, PBKDF2 + AES-256-CTR with deterministic IV, `TxtStoneHost` / `ZipStoneHost` / `PngStoneHost` (v1) | 🟡 PNG-v3 Mandelbrot-XOR carrier deferred |
+| 4 | `IRoundTripVerifier` with SHA-256 byte compare + structural-equivalence fallback, `Sha256` helper, `TempScope`, `IrStructuralEquivalence` | ✅ |
+| 5 | `Vitriol.Formats.Text` (`PlainTextHandler` reader+writer+stream-converter, BOM-aware `EncodingDetector` with non-UTF-8 warning) + `Vitriol.Cli` (`convert <src> <dst>` with `--verify`/`--masquerade`/`--password`/`--compiler`) | ✅ |
+| 6 | Stone audio v1 hosts — `WavStoneHost` (RIFF data chunk) + `AiffStoneHost` (FORM/SSND with IEEE 754 80-bit extended-float sample rate) | 🟡 v3 music-synth variants deferred |
+| 7 | `Vitriol.Formats.Image` — first `IMediaHandler` via SixLabors.ImageSharp; covers PNG/JPG/WebP/BMP/TIFF/GIF/PBM/TGA. Lights up `SameMediaHandlerGate` and `CrossCategoryImageToDocumentGate` (origin sidecar path) | ✅ |
+
+### Outstanding deferred work (Sprint 8+, no fixed order)
+
+| Area | Status | Notes |
+|---|---|---|
+| Stone PNG v3 (Mandelbrot fractal carrier + k=1 LSB bit-pack + `Vector<double>` SIMD) | ⏳ | Substantial; needs exact byte parity with Python's NumPy iteration scheme |
+| Stone audio v3 (procedural music synthesis port of `_music.py`, FLAC via FFmpeg, M4A/ALAC via FFmpeg) | ⏳ | Music synth port + FFmpeg subprocess wrapper |
+| Stone video v3 (MKV animated Mandelbrot at 30 fps, payload in pixel LSBs) | ⏳ | Highest complexity in the Stone catalogue; needs FFmpeg frame pipe |
+| Stone 3D v3 (PLY / OBJ / GLB envelope embedding) | ⏳ | Format-aware byte stuffing; modest scope |
+| Self-extracting `.py` / `.exe` Stone outputs | ⏳ | Port of `tools/selfextract_stub.py` + `tools/build_selfextract_stub.py` |
+| `Vitriol.Formats.Tabular` (CSV/TSV via CsvHelper, XLSX via ClosedXML, Parquet/Feather/ORC via Apache.Arrow) | ⏳ | Exercises `DocKind.Tabular` path and the Sprint 1 `TabularToTextDoc` adapters |
+| `Vitriol.Formats.Doc` (DOCX via DocumentFormat.OpenXml, PDF read via PdfPig, PDF write via QuestPDF, EPUB via VersOne.Epub) | ⏳ | Largest single sprint; trailer-envelope sidecar lands here |
+| `Vitriol.Formats.Archive` (ZIP / 7Z / TAR family via System.IO.Compression + SharpCompress) | ⏳ | Fully managed, clean scope |
+| `Vitriol.Formats.Model` (3D via AssimpNet wrapping the Assimp DLL) | ⏳ | Needs `Vitriol.Bootstrap` to fetch the native binary |
+| `Vitriol.Formats.Media` (audio/video via FFMpegCore subprocess wrapper) | ⏳ | Needs `Vitriol.Bootstrap`; mirrors Vitriol's existing FFmpeg codec map |
+| `Vitriol.Formats.Pandoc` (subprocess wrapper for ~50 markup formats) | ⏳ | HTML pivot strategy from Sprint 1 adapter registry |
+| `Vitriol.Formats.Font` (OTF/TTF/WOFF/WOFF2 via SixLabors.Fonts) | ⏳ | Cleanly bounded; fonttools port |
+| `Vitriol.Formats.Crypto` (PEM / CRT / CER / KEY / DER via `System.Security.Cryptography.X509Certificates`) | ⏳ | Built-in BCL; tiny scope |
+| Optional image plugins (AVIF / HEIC / JXL via Magick.NET) | ⏳ | Needs the native ImageMagick binary |
+| SVG read (Svg.Skia) | ⏳ | Read-only, like Vitriol |
+| `Vitriol.Bootstrap` — FFmpeg / Pandoc / Assimp / DejaVu Sans auto-fetch with SHA-256 pinning | ⏳ | Precondition for all subprocess-backed handlers |
+| Parallel-run CI harness (compare Python Vitriol vs .NET Vitriol on the same corpus) | ⏳ | Migration plan Phase 9 below |
+| NativeAOT single-file publish | ⏳ | Migration plan Phase 10 below |
+| GUI port (Avalonia or MAUI) | ⏳ | Explicitly out of MVP scope; follow-on phase 11 |
+
+### Component summary (where the code lives today)
+
+`dotnet/Vitriol.Core/` ✅ — IR, adapters, detection, registry, routing, verification.
+`dotnet/Vitriol.Stone/` 🟡 — envelope + crypto + 5 of ~10 carrier hosts (TXT, ZIP, PNG-v1, WAV-v1, AIFF-v1).
+`dotnet/Vitriol.Formats.Text/` ✅ — `PlainTextHandler` for .txt/.log/.py/.xml/.html.
+`dotnet/Vitriol.Formats.Image/` ✅ — `ImageMediaHandler` for 8 image format families.
+`dotnet/Vitriol.Cli/` ✅ — `vitriol convert` end-to-end with verification.
+`dotnet/Vitriol.Tests/` ✅ — ~100 xUnit + FsCheck + Shouldly tests covering everything above.
+
+---
+
 ## 1. Executive Summary
 
 Vitriol is an offline-first desktop file converter covering ~150 extensions across eleven categories: documents (markup / office / wiki / technical / slides / bibliography), data, images, audio, video, 3D models, archives, comic books, subtitles, fonts, and X.509 crypto material. It is implemented in Python on PySide6 and bundles or auto-fetches three external binaries — FFmpeg (audio/video), Assimp (3D), and Pandoc (~50 markup/document formats) — via `launcher.py`.
@@ -460,18 +512,18 @@ The byte-lossless guarantee must come from a small set of mechanisms, each of wh
 
 ## 9. Migration Plan
 
-| Phase | Objective | Main tasks | Expected output | Risks | Verification |
-|---|---|---|---|---|---|
-| 1. Codebase discovery | Pin every assumption | This document; `samples/` round-trip baseline | This doc + a `baseline.csv` of SHA-256 for every sample's round-trip via current Vitriol | Misreading an undocumented Stone variant | Run current Vitriol on every sample with Verify Round-Trip and record hashes |
-| 2. Format-contract docs | Spec UCMSv1/v2/v3 envelope, codec maps, magic-byte tables | Translate `masquerade.py:39–337, 465–505` and `audio_video.py` codec maps into `docs/format-contracts.md` | Format-contract spec | Spec omissions cause mismatches at phase 9 | Cross-reference with code by `grep` |
-| 3. Intermediate model | Port `intermediate.py` to immutable C# records | `Vitriol.Core.Ir` records + adapter registry | Solution compiles, unit tests for record equality pass | Misnaming `List` (reserved-ish) → use `ListBlock` | xUnit equality tests |
-| 4. Adapter extraction | Build `IFormatRegistry`, gate-based router | `IRoutingGate` impls one per current `router.py` branch | Router runs but rejects every conversion (no handlers yet) | Wrong gate order → wrong dispatch | Run with mocked handlers; assert each gate matches its Vitriol counterpart |
-| 5. Reader/writer implementations | Implement handlers category by category | Text → Tabular → Image → Archive → Doc → Media → 3D → Stone | Each handler passes its golden-file tests | Library gaps (e.g. PdfPig vs pdfminer.six on edge fonts) | Per-handler unit tests + golden files |
-| 6. Stone engine port | UCMSv1/v2/v3 byte-identical with current Vitriol | `Vitriol.Stone` project; Mandelbrot SIMD; music synth port | Stone round-trips byte-identical on every sample, including AES-encrypted | Floating-point divergence in Mandelbrot; PCM rounding in music synth | Compare PNG/MKV/WAV/M4A output SHA-256 to `baseline.csv` |
-| 7. Round-trip verifier | `IRoundTripVerifier` + structural-equivalence for IR | Implement plus xUnit harness | Verifier runs on every sample, reports byte-equal or specific structural diff | Structural comparator misses semantic equality (e.g. trailing whitespace) | Tune against current Vitriol's success/failure cases |
-| 8. Bootstrap | Port `launcher.py` for FFmpeg/Pandoc/Assimp auto-fetch | `Vitriol.Bootstrap` with HTTPS download + SHA-256 verification + arch detection | Fresh machine bootstraps to working CLI in one command | Upstream URL drift; signature changes | Pin SHA-256 in code, CI fetches and verifies weekly |
-| 9. Parallel run | Run current Vitriol and Vitriol.Net on the same corpus | CI harness that converts every supported `(src_ext, dst_ext)` pair through both implementations | Hash-equal report for Stone/trailer paths; structural-equal report for IR path | Per-format library quirks surface late | Compare SHA-256 (Stone) and IR-structural-equality (IR) for every pair |
-| 10. CLI release | Package `Vitriol.Cli` as a self-contained single-file native AOT (if feasible) executable | NativeAOT trimming, dependency pinning, release notes | `vitriol convert input.png output.pdf` works on Win/macOS/Linux | AOT-incompatible libraries (ImageSharp historically had issues) | Smoke test on all three platforms |
+| Phase | Status | Objective | Main tasks | Expected output | Risks | Verification |
+|---|---|---|---|---|---|---|
+| 1. Codebase discovery | ✅ | Pin every assumption | This document; `samples/` round-trip baseline | This doc + a `baseline.csv` of SHA-256 for every sample's round-trip via current Vitriol | Misreading an undocumented Stone variant | Run current Vitriol on every sample with Verify Round-Trip and record hashes |
+| 2. Format-contract docs | 🟡 | Spec UCMSv1/v2/v3 envelope, codec maps, magic-byte tables | Translate `masquerade.py:39–337, 465–505` and `audio_video.py` codec maps into `docs/format-contracts.md` | Format-contract spec | Spec omissions cause mismatches at phase 9 | Cross-reference with code by `grep` — envelope shape is documented inline in `Vitriol.Stone/Envelope/`; codec maps still TODO |
+| 3. Intermediate model | ✅ | Port `intermediate.py` to immutable C# records | `Vitriol.Core.Ir` records + adapter registry | Solution compiles, unit tests for record equality pass | Misnaming `List` (reserved-ish) → use `ListBlock` | xUnit equality tests pass (Sprint 1) |
+| 4. Adapter extraction | ✅ | Build `IFormatRegistry`, gate-based router | `IRoutingGate` impls one per current `router.py` branch | Router runs but rejects every conversion (no handlers yet) | Wrong gate order → wrong dispatch | Run with mocked handlers; assert each gate matches its Vitriol counterpart (Sprint 2) |
+| 5. Reader/writer implementations | 🟡 | Implement handlers category by category | Text → Tabular → Image → Archive → Doc → Media → 3D → Stone | Each handler passes its golden-file tests | Library gaps (e.g. PdfPig vs pdfminer.six on edge fonts) | Text ✅ (Sprint 5), Image ✅ (Sprint 7), Stone hosts ✅ (Sprints 3+6); Tabular / Archive / Doc / Media / 3D / Font / Crypto ⏳ |
+| 6. Stone engine port | 🟡 | UCMSv1/v2/v3 byte-identical with current Vitriol | `Vitriol.Stone` project; Mandelbrot SIMD; music synth port | Stone round-trips byte-identical on every sample, including AES-encrypted | Floating-point divergence in Mandelbrot; PCM rounding in music synth | UCMSv1 + UCMSv3 envelope + AES-CTR + TXT/ZIP/PNG-v1/WAV-v1/AIFF-v1 ✅ (Sprints 3+6); PNG-v3 Mandelbrot, audio-v3 music synth, MKV-v3, 3D-v3 ⏳ |
+| 7. Round-trip verifier | ✅ | `IRoundTripVerifier` + structural-equivalence for IR | Implement plus xUnit harness | Verifier runs on every sample, reports byte-equal or specific structural diff | Structural comparator misses semantic equality (e.g. trailing whitespace) | All 5 v1 Stone hosts report `ByteEqual` end-to-end via DI (Sprint 4) |
+| 8. Bootstrap | ⏳ | Port `launcher.py` for FFmpeg/Pandoc/Assimp auto-fetch | `Vitriol.Bootstrap` with HTTPS download + SHA-256 verification + arch detection | Fresh machine bootstraps to working CLI in one command | Upstream URL drift; signature changes | Pin SHA-256 in code, CI fetches and verifies weekly |
+| 9. Parallel run | ⏳ | Run current Vitriol and Vitriol.Net on the same corpus | CI harness that converts every supported `(src_ext, dst_ext)` pair through both implementations | Hash-equal report for Stone/trailer paths; structural-equal report for IR path | Per-format library quirks surface late | Compare SHA-256 (Stone) and IR-structural-equality (IR) for every pair |
+| 10. CLI release | 🟡 | Package `Vitriol.Cli` as a self-contained single-file native AOT (if feasible) executable | NativeAOT trimming, dependency pinning, release notes | `vitriol convert input.png output.pdf` works on Win/macOS/Linux | AOT-incompatible libraries (ImageSharp historically had issues) | CLI binary ✅ (Sprint 5; smoke tests cover stream pass-through + Stone+verify + image transcode); NativeAOT publish ⏳ |
 
 GUI is explicitly out of scope. A follow-on phase 11 can re-introduce Avalonia or MAUI once the engine is solid.
 
