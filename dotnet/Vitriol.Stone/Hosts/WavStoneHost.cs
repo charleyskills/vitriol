@@ -155,7 +155,7 @@ public sealed class WavStoneHost : IStoneHost
             throw new StoneEnvelopeException("WAV: no data chunk found.");
         }
 
-        UcmsEnvelope envelope = UcmsEnvelope.Parse(dataBlob);
+        var envelope = UcmsEnvelope.Parse(dataBlob);
         return new StoneExtractionResult(envelope.Payload, envelope.Extension);
     }
 

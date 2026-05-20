@@ -21,9 +21,11 @@ public static class MandelbrotPngCodec
     public static ReadOnlySpan<byte> Signature =>
         new byte[] { 0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A };
 
-    private static ReadOnlySpan<byte> TagIhdr => "IHDR"u8;
-    private static ReadOnlySpan<byte> TagIdat => "IDAT"u8;
-    private static ReadOnlySpan<byte> TagIend => "IEND"u8;
+    // byte[] so they can be passed to WriteChunkAsync (ReadOnlyMemory<byte> parameter,
+    // incompatible with ReadOnlySpan<byte> across async boundaries).
+    private static readonly byte[] TagIhdr = "IHDR"u8.ToArray();
+    private static readonly byte[] TagIdat = "IDAT"u8.ToArray();
+    private static readonly byte[] TagIend = "IEND"u8.ToArray();
 
     public sealed record Decoded(int Width, int Height, byte[] PixelsRgb);
 

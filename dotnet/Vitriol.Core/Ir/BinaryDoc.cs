@@ -11,7 +11,7 @@ public sealed record BinaryDoc(ReadOnlyMemory<byte> Bytes, string Mime, Document
     public BinaryDoc(ReadOnlyMemory<byte> bytes, string mime)
         : this(bytes, mime, DocumentMetadata.Empty) { }
 
-    public virtual bool Equals(BinaryDoc? other)
+    public bool Equals(BinaryDoc? other)
     {
         if (other is null)
         {

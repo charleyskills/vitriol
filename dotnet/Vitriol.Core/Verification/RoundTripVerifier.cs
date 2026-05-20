@@ -92,9 +92,9 @@ public sealed class RoundTripVerifier : IRoundTripVerifier
 
             if (sourceHash == reverseHash)
             {
-                _logger.LogInformation(
-                    "Round-trip verified by byte equality. Source/reverse SHA-256 = {Hash}",
-                    sourceHash);
+                //_logger.LogInformation(
+                //    "Round-trip verified by byte equality. Source/reverse SHA-256 = {Hash}",
+                //    sourceHash);
                 progress?.Report(new ConversionEvent.Progress(1.0));
                 return new RoundTripResult.ByteEqual(sourceHash);
             }
@@ -111,8 +111,8 @@ public sealed class RoundTripVerifier : IRoundTripVerifier
                 switch (structuralResult)
                 {
                     case StructuralComparisonResult.Equivalent equiv:
-                        _logger.LogInformation(
-                            "Round-trip verified by structural equivalence: {Desc}", equiv.Description);
+                        //_logger.LogInformation(
+                        //    "Round-trip verified by structural equivalence: {Desc}", equiv.Description);
                         return new RoundTripResult.StructurallyEqual(equiv.Description);
                     case StructuralComparisonResult.Different diff:
                         return new RoundTripResult.StructurallyDiffers(diff.Description);

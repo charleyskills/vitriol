@@ -85,7 +85,7 @@ public sealed class UcmsV3EnvelopeTests
         bool ok = UcmsV3Envelope.TryParse(new byte[10], ReadOnlyMemory<byte>.Empty,
             out _, out string? error);
         ok.ShouldBeFalse();
-        error.ShouldContain("too short");
+        error!.ShouldContain("too short");
     }
 
     [Property(MaxTest = 30)]

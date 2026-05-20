@@ -4,6 +4,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using Vitriol.Core.Pipeline;
 using Vitriol.Core.Registry;
 using Vitriol.Formats.Image;
+using Vitriol.Formats.Text;
 
 namespace Vitriol.Tests.Formats.Image;
 

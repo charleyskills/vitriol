@@ -349,14 +349,14 @@ public sealed class CryptoHandler : IFormatReader, IFormatWriter
         // Legacy formats (PKCS#1 RSA, SEC1 EC) require their dedicated import:
         try
         {
-            using RSA rsa = RSA.Create();
+            using var rsa = RSA.Create();
             rsa.ImportRSAPrivateKey(der, out _);
             return rsa.ExportPkcs8PrivateKey();
         }
         catch (CryptographicException) { /* not RSA PKCS#1 */ }
         try
         {
-            using ECDsa ec = ECDsa.Create();
+            using var ec = ECDsa.Create();
             ec.ImportECPrivateKey(der, out _);
             return ec.ExportPkcs8PrivateKey();
         }

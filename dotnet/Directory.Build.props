@@ -20,8 +20,26 @@
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
+  <!-- NuGet packaging (applies to every packable library project) -->
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Authors>Charley</Authors>
+    <PackageLicenseExpression>Elastic-2.0</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!--
+    When publishing a self-contained single-file binary (RuntimeIdentifier is set),
+    strip debug symbols from every project so no *.pdb files land next to the binary.
+  -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
 </Project>

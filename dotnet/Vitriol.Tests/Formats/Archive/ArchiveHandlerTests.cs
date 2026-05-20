@@ -81,7 +81,6 @@ public sealed class ArchiveHandlerTests
     [Theory]
     [InlineData(".tar.gz")]
     [InlineData(".tar.bz2")]
-    [InlineData(".tar.xz")]
     public async Task Cross_kind_zip_to_compressed_tar_round_trips(string dstExt)
     {
         byte[] zipBytes = BuildZip(("file.txt", "compressed content"u8.ToArray()));
@@ -136,6 +135,21 @@ public sealed class ArchiveHandlerTests
     }
 
     [Fact]
+    public async Task Write_rejects_tar_xz_with_explanation()
+    {
+        // SharpCompress 0.48 does not implement an xz writer for tar archives;
+        // writing .tar.xz must fail with a clear message rather than an
+        // internal InvalidFormatException from inside SharpCompress.
+        ArchiveDoc archive = new(BuildZip(("x.txt", "x"u8.ToArray())), ArchiveKind.Zip);
+        await using MemoryStream dst = new();
+
+        UnsupportedConversionException ex = await Should.ThrowAsync<UnsupportedConversionException>(
+            async () => await _handler.WriteAsync(archive, dst, new WriteContext(".tar.xz"), default));
+
+        ex.Message.ShouldContain("TAR.XZ");
+    }
+
+    [Fact]
     public async Task Write_rejects_non_archive_document()
     {
         await using MemoryStream dst = new();
@@ -155,6 +169,7 @@ public sealed class ArchiveHandlerTests
         ArchiveKindMap.WritableExtensions.ShouldNotContain(".rar");
         ArchiveKindMap.WritableExtensions.ShouldNotContain(".7z");
         ArchiveKindMap.WritableExtensions.ShouldNotContain(".tar.zst");
+        ArchiveKindMap.WritableExtensions.ShouldNotContain(".tar.xz");
         ArchiveKindMap.WritableExtensions.ShouldContain(".zip");
         ArchiveKindMap.WritableExtensions.ShouldContain(".tar.gz");
     }
@@ -178,7 +193,7 @@ public sealed class ArchiveHandlerTests
     {
         Dictionary<string, byte[]> result = new(StringComparer.Ordinal);
         using MemoryStream stream = new(archive.SourceBytes.ToArray(), writable: false);
-        using SharpCompress.Readers.IReader reader = SharpCompress.Readers.ReaderFactory.Open(stream);
+        using SharpCompress.Readers.IReader reader = SharpCompress.Readers.ReaderFactory.OpenReader(stream, new SharpCompress.Readers.ReaderOptions());
         while (reader.MoveToNextEntry())
         {
             if (reader.Entry.IsDirectory)

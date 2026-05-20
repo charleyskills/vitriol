@@ -8,6 +8,9 @@ using Vitriol.Core.Ir;
 using Vitriol.Core.Ir.Adapters;
 using Vitriol.Core.Pipeline;
 using Vitriol.Formats.Text;
+// Inside namespace Vitriol.Formats.Tabular the name 'Tabular' resolves to the
+// enclosing namespace itself — use a distinct alias to refer to the IR record type.
+using TabularDoc = global::Vitriol.Core.Ir.Tabular;
 
 namespace Vitriol.Formats.Tabular;
 
@@ -72,7 +75,7 @@ public sealed class CsvTextHandler : IFormatReader, IFormatWriter
 
         string sheetName = SheetNameFromHint(context.SourceHint);
         Sheet sheet = new(sheetName, new EquatableArray<EquatableArray<Cell>>(rows.ToImmutable()));
-        return new Tabular(EquatableArray.Create(sheet));
+        return new TabularDoc(EquatableArray.Create(sheet));
     }
 
     public async ValueTask WriteAsync(IDocument document, Stream output, WriteContext context, CancellationToken cancellationToken)
@@ -80,9 +83,9 @@ public sealed class CsvTextHandler : IFormatReader, IFormatWriter
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(output);
 
-        Tabular tabular = document switch
+        TabularDoc tabular = document switch
         {
-            Tabular t => t,
+            TabularDoc t => t,
             _ => throw new InvalidOperationException(
                 $"CsvTextHandler.Write expects a Tabular, got {document.GetType().Name}."),
         };
@@ -109,7 +112,9 @@ public sealed class CsvTextHandler : IFormatReader, IFormatWriter
         };
 
         // Leave the underlying stream open — disposing the writer would close it.
-        await using StreamWriter sw = new(output, Encoding.UTF8, leaveOpen: true);
+        // Use UTF-8 without BOM: Encoding.UTF8 writes a BOM; callers reading back
+        // with string(bytes) would see the U+FEFF prefix rather than the raw text.
+        await using StreamWriter sw = new(output, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
         await using CsvWriter writer = new(sw, config, leaveOpen: true);
 
         foreach (EquatableArray<Cell> row in sheet.Rows)

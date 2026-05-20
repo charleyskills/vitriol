@@ -131,10 +131,10 @@ public sealed record UcmsV3Envelope(int Width, int Height, string Extension, Rea
 
         int written = 0;
         uint counter = 0;
+        Span<byte> block = stackalloc byte[32]; // moved outside loop to avoid CA2014 (stackalloc in loop)
         while (written < padLen)
         {
             BinaryPrimitives.WriteUInt32BigEndian(counterBuffer[digest.Length..], counter);
-            Span<byte> block = stackalloc byte[32];
             System.Security.Cryptography.SHA256.HashData(counterBuffer, block);
             int n = Math.Min(block.Length, padLen - written);
             block[..n].CopyTo(padded.AsSpan(padStart + written));

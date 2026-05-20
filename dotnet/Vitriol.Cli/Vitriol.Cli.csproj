@@ -6,6 +6,31 @@
     <AssemblyName>vitriol</AssemblyName>
     <Description>Vitriol command-line front-end.</Description>
     <PublishAot>false</PublishAot>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Single-file publish defaults.
+    Pass -r <RID> on the command line to select the target platform:
+      win-x64 | win-arm64 | osx-x64 | osx-arm64 | linux-x64 | linux-arm64
+
+    IncludeNativeLibrariesForSelfExtract bundles SkiaSharp's native .so/.dylib/.dll
+    inside the single executable (they are still extracted to a per-user temp dir at
+    first launch, but the file you ship is always one binary).
+
+    EnableCompressionInSingleFile shrinks the output by ~30-40 % at the cost of a
+    slightly slower cold-start extraction; omit it if startup latency matters more
+    than distribution size.
+  -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- Suppress .pdb files next to the binary in release publishes. -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,5 +54,51 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Vitriol.Tests" />
   </ItemGroup>
+
+  <!--
+    Clean up the publish file list for single-file releases:
+      • PDB files  — stripped from all dependency projects (DebugType=none in
+                     Directory.Build.props handles new builds, but cached .pdb files
+                     from earlier builds would otherwise slip through).
+      • LatoFont/  — QuestPDF injects these as None items via its .targets file so
+                     they end up in every publish; we embed them in
+                     Vitriol.Formats.Doc.dll as EmbeddedResource instead, so the
+                     font files must NOT also be copied alongside the binary.
+                     PdfHandler.EnsureFontsRegistered() loads them at first PDF write.
+
+    Both removals target ResolvedFileToPublish, which is the final file list that
+    the SDK copies into $(PublishDir). AfterTargets="ComputeFilesToPublish" ensures
+    we run after all projects have contributed their files.
+  -->
+  <!--
+    Phase 1 (before copy): strip PDB and LatoFont entries from the publish file
+    list so the SDK never copies them into $(PublishDir).
+  -->
+  <Target Name="CleanSingleFilePublishFileList"
+          AfterTargets="ComputeFilesToPublish"
+          Condition="'$(PublishSingleFile)' == 'true'">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                             Condition="'%(Extension)' == '.pdb'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                             Condition="$([System.String]::Copy('%(RelativePath)').StartsWith('LatoFont'))" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Phase 2 (after copy): remove any empty LatoFont/ directory the SDK may have
+    pre-created before our file-list filter ran, and any stale PDB files left over
+    from incremental builds. Safe to run on a clean output too (Condition guards).
+  -->
+  <Target Name="CleanSingleFilePublishDirectory"
+          AfterTargets="Publish"
+          Condition="'$(PublishSingleFile)' == 'true'">
+    <RemoveDir Directories="$(PublishDir)LatoFont"
+               Condition="Exists('$(PublishDir)LatoFont')" />
+    <ItemGroup>
+      <_StalePdbs Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_StalePdbs)" />
+  </Target>
 
 </Project>

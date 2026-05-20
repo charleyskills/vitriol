@@ -35,7 +35,7 @@ public sealed record ImageBlock(
     int? Height = null,
     string? Href = null) : Block
 {
-    public virtual bool Equals(ImageBlock? other)
+    public bool Equals(ImageBlock? other)
     {
         if (other is null)
         {

@@ -49,8 +49,8 @@ public sealed class ConversionRouter : IConversionRouter
         foreach (IRoutingGate gate in _gates)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            _logger.LogDebug("Routing gate {Gate} (order {Order}) probing {Src} -> {Dst}",
-                gate.Name, gate.Order, context.Job.SourceExtension, context.Job.DestinationExtension);
+            //_logger.LogDebug("Routing gate {Gate} (order {Order}) probing {Src} -> {Dst}",
+            //    gate.Name, gate.Order, context.Job.SourceExtension, context.Job.DestinationExtension);
 
             RoutingDecision decision = await gate.TryHandleAsync(context, cancellationToken)
                 .ConfigureAwait(false);
@@ -58,8 +58,8 @@ public sealed class ConversionRouter : IConversionRouter
             switch (decision)
             {
                 case RoutingDecision.Handled handled:
-                    _logger.LogInformation("Gate {Gate} handled {Src} -> {Dst}",
-                        handled.GateName, context.Job.SourceExtension, context.Job.DestinationExtension);
+                    //_logger.LogInformation("Gate {Gate} handled {Src} -> {Dst}",
+                    //    handled.GateName, context.Job.SourceExtension, context.Job.DestinationExtension);
                     progress?.Report(new ConversionEvent.Stage($"Handled by gate: {handled.GateName}"));
                     return;
                 case RoutingDecision.Refused refused:

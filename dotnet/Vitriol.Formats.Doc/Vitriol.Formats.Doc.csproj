@@ -15,9 +15,32 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="DocumentFormat.OpenXml" />
-    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="PdfPig" />
     <PackageReference Include="QuestPDF" />
     <PackageReference Include="Markdig" />
   </ItemGroup>
+
+  <!--
+    Embed QuestPDF's Lato fonts directly in the Formats.Doc assembly so that a
+    'dotnet publish -p:PublishSingleFile=true' binary is fully self-contained:
+    no LatoFont/ directory needs to sit alongside the executable.
+
+    QuestPDF's NuGet package ships the fonts in $(NuGetPackageRoot)questpdf\<ver>\LatoFont\
+    and injects them via QuestPDF.targets as None items with CopyToOutputDirectory.
+    We embed them here as EmbeddedResource items (same data, different item type).
+    PdfHandler.EnsureFontsRegistered() loads them via GetManifestResourceStream on
+    the first PDF write — no disk file needed at runtime.
+
+    SuppressQuestPDFFontPublish removes the files from the final publish list
+    (ResolvedFileToPublish) so they don't also appear next to the binary.
+    NOTE: 'dotnet build' still copies them to bin/ — that is intentional so that
+    running the app unbuilt (dotnet run) continues to work without embedding.
+  -->
+  <ItemGroup>
+    <EmbeddedResource
+      Include="$(NuGetPackageRoot)questpdf\2024.12.0\LatoFont\*.ttf"
+      LogicalName="LatoFont/%(Filename)%(Extension)" />
+  </ItemGroup>
+
 
 </Project>

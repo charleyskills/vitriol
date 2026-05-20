@@ -27,7 +27,7 @@ public static class Sha256
     public static async ValueTask<byte[]> HashFileBytesAsync(string path, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(path);
-        using IncrementalHash hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         byte[] buffer = new byte[ChunkSize];
 
         await using FileStream fs = new(path, FileMode.Open, FileAccess.Read, FileShare.Read,

@@ -1,13 +1,17 @@
 using System.Collections.Immutable;
+using QuestPDF.Drawing;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.Exceptions;
 using Vitriol.Core.Collections;
 using Vitriol.Core.Ir;
 using Vitriol.Core.Pipeline;
 using Vitriol.Stone.Envelope;
+// QuestPDF.Infrastructure also exports IDocument; alias to avoid ambiguity.
+using IDocument = Vitriol.Core.Ir.IDocument;
 
 namespace Vitriol.Formats.Doc;
 
@@ -25,9 +29,40 @@ namespace Vitriol.Formats.Doc;
 /// <see cref="Trailer.PdfTrailerEnvelopeReader"/> and the router's
 /// <c>TrailerEnvelopeGate</c>; the handler's read path runs only when the
 /// gate didn't short-circuit.</para>
+///
+/// <para><b>Embedded fonts</b>: QuestPDF's Lato TTF files are embedded in
+/// this assembly (see Vitriol.Formats.Doc.csproj) so that single-file
+/// published binaries need no <c>LatoFont/</c> directory alongside them.
+/// <see cref="EnsureFontsRegistered"/> loads them once on the first write.</para>
 /// </summary>
 public sealed class PdfHandler : IFormatReader, IFormatWriter
 {
+    // ── embedded-font registration ────────────────────────────────────────
+    private static volatile bool s_fontsRegistered;
+    private static readonly Lock s_fontLock = new();
+
+    /// <summary>
+    /// Loads every *.ttf embedded in this assembly into QuestPDF's
+    /// <see cref="FontManager"/> so that no external LatoFont/ directory is
+    /// required at runtime.  Called once before the first PDF write.
+    /// </summary>
+    private static void EnsureFontsRegistered()
+    {
+        if (s_fontsRegistered) return;
+        lock (s_fontLock)
+        {
+            if (s_fontsRegistered) return;
+            foreach (string name in typeof(PdfHandler).Assembly.GetManifestResourceNames())
+            {
+                if (!name.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                using Stream? stream = typeof(PdfHandler).Assembly.GetManifestResourceStream(name);
+                if (stream is not null)
+                    FontManager.RegisterFont(stream);
+            }
+            s_fontsRegistered = true;
+        }
+    }
     public DocKind Kind => DocKind.Text;
 
     public IReadOnlySet<string> SupportedExtensions { get; } =
@@ -38,13 +73,13 @@ public sealed class PdfHandler : IFormatReader, IFormatWriter
         ArgumentNullException.ThrowIfNull(input);
 
         // PdfPig prefers byte arrays.
-        using MemoryStream buf = new();
+        using var buf = new MemoryStream();
         await input.CopyToAsync(buf, cancellationToken).ConfigureAwait(false);
         byte[] bytes = buf.ToArray();
 
         try
         {
-            using PdfDocument pdf = PdfDocument.Open(bytes);
+            using var pdf = PdfDocument.Open(bytes);
             ImmutableArray<Block>.Builder blocks = ImmutableArray.CreateBuilder<Block>();
             int totalChars = 0;
             int pageCount = 0;
@@ -97,6 +132,7 @@ public sealed class PdfHandler : IFormatReader, IFormatWriter
                 $"PdfHandler.Write expects a TextDoc, got {document.GetType().Name}."),
         };
 
+        EnsureFontsRegistered();
         QuestPDF.Settings.License = LicenseType.Community;
 
         // Render into a memory buffer so we can append the trailer envelope.

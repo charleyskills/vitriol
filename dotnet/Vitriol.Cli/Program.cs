@@ -42,6 +42,14 @@ public static class Program
                 return ExitCodes.Success;
             default:
                 stderr.WriteLine($"vitriol: unknown subcommand '{args[0]}'");
+                if (args[0].StartsWith("--", StringComparison.Ordinal))
+                {
+                    // Common mistake: typing `--convert` (flag syntax) instead of `convert`
+                    // (bare subcommand). The README shows `dotnet run -- convert …` where the
+                    // `--` is a dotnet-run separator, not part of the subcommand name.
+                    string suggestion = args[0][2..];
+                    stderr.WriteLine($"  hint: subcommands don't use '--'. Did you mean:  vitriol {suggestion} …?");
+                }
                 PrintRootUsage(stderr);
                 return ExitCodes.Usage;
         }

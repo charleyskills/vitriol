@@ -38,6 +38,24 @@ The solution uses the XML-based **`.slnx`** format (introduced in .NET 9, fully 
 
 ## Run
 
+> **Running the compiled binary vs. `dotnet run`**
+>
+> The examples below use `dotnet run --project Vitriol.Cli -- convert …`.
+> The bare `--` is a *dotnet run* separator — it tells the `dotnet` CLI that everything
+> after it belongs to the app, not to dotnet itself. It is **not** part of the subcommand name.
+>
+> When invoking the published `vitriol.exe` (or `vitriol` on Unix) directly, drop both
+> `dotnet run --project Vitriol.Cli` and the `--`:
+>
+> ```
+> # compiled binary
+> .\vitriol.exe convert src.7z dst.png --masquerade --password chopin --verify
+>
+> # dev / source tree (dotnet run)
+> dotnet run --project Vitriol.Cli -- convert src.7z dst.png --masquerade --password chopin --verify
+> #                                ^^  dotnet separator — NOT part of the subcommand name
+> ```
+
 ```bash
 dotnet run --project Vitriol.Cli -- convert <src> <dst> [--verify] [--password <p>] [--masquerade] [--compiler] [--verbose]
 ```

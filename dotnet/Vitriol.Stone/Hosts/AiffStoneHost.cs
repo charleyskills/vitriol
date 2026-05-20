@@ -164,7 +164,7 @@ public sealed class AiffStoneHost : IStoneHost
             throw new StoneEnvelopeException("AIFF: no SSND chunk.");
         }
 
-        UcmsEnvelope envelope = UcmsEnvelope.Parse(ssndBlob);
+        var envelope = UcmsEnvelope.Parse(ssndBlob);
         return new StoneExtractionResult(envelope.Payload, envelope.Extension);
     }
 

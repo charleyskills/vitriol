@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Image processing (Sprint 3 Stone PNG host and later Sprint 6+ Formats.Image)">
-    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageVersion Include="System.IO.Hashing" Version="10.0.0" />
   </ItemGroup>
 
@@ -30,14 +30,17 @@
   </ItemGroup>
 
   <ItemGroup Label="Archive formats (Sprint 9 — ZIP / 7Z / TAR family via SharpCompress)">
-    <PackageVersion Include="SharpCompress" Version="0.38.0" />
+    <PackageVersion Include="SharpCompress" Version="0.48.1" />
   </ItemGroup>
 
   <ItemGroup Label="Document formats (Sprint 12 — DOCX / PDF / Markdown)">
-    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.1.0" />
-    <PackageVersion Include="UglyToad.PdfPig" Version="0.1.10" />
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.1.1" />
+    <!-- PdfPig is the stable NuGet ID; the assembly namespace remains UglyToad.PdfPig -->
+    <PackageVersion Include="PdfPig" Version="0.1.14" />
     <PackageVersion Include="QuestPDF" Version="2024.12.0" />
     <PackageVersion Include="Markdig" Version="0.38.0" />
+    <!-- Transitive pin: System.IO.Packaging 8.0.0 carries two high-severity CVEs -->
+    <PackageVersion Include="System.IO.Packaging" Version="10.0.8" />
   </ItemGroup>
 
   <ItemGroup Label="Test stack">

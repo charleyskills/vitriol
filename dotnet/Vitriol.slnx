@@ -7,6 +7,7 @@
   <Project Path="Vitriol.Formats.Archive/Vitriol.Formats.Archive.csproj" />
   <Project Path="Vitriol.Formats.Crypto/Vitriol.Formats.Crypto.csproj" />
   <Project Path="Vitriol.Formats.Doc/Vitriol.Formats.Doc.csproj" />
+  <Project Path="Vitriol/Vitriol.csproj" />
   <Project Path="Vitriol.Cli/Vitriol.Cli.csproj" />
   <Project Path="Vitriol.Tests/Vitriol.Tests.csproj" />
 </Solution>

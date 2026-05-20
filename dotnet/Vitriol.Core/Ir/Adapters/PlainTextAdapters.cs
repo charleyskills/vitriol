@@ -11,7 +11,7 @@ namespace Vitriol.Core.Ir.Adapters;
 /// </summary>
 public sealed class TextDocToPlainAdapter
 {
-    public string Adapt(TextDoc source, IProgress<ConversionEvent>? progress = null)
+    public static string Adapt(TextDoc source, IProgress<ConversionEvent>? progress = null)
     {
         StringBuilder sb = new();
         bool first = true;
@@ -39,7 +39,7 @@ public sealed class TextDocToPlainAdapter
 /// </summary>
 public sealed class PlainToTextDocAdapter
 {
-    public TextDoc Adapt(string text, IProgress<ConversionEvent>? progress = null)
+    public static TextDoc Adapt(string text, IProgress<ConversionEvent>? progress = null)
     {
         ImmutableArray<Block>.Builder blocks = ImmutableArray.CreateBuilder<Block>();
         string normalized = text.ReplaceLineEndings("\n");

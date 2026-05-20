@@ -9,7 +9,7 @@ public sealed class TempScope : IDisposable, IAsyncDisposable
 {
     public TempScope(string prefix = "vitriol-")
     {
-        string root = Path.Combine(Path.GetTempPath(), prefix + Guid.NewGuid().ToString("N"));
+        string root = System.IO.Path.Combine(System.IO.Path.GetTempPath(), prefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         Path = root;
     }

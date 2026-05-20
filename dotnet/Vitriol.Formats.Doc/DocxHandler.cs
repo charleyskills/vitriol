@@ -48,7 +48,7 @@ public sealed class DocxHandler : IFormatReader, IFormatWriter
 
         try
         {
-            using WordprocessingDocument doc = WordprocessingDocument.Open(readable, isEditable: false);
+            using var doc = WordprocessingDocument.Open(readable, isEditable: false);
             W.Body? body = doc.MainDocumentPart?.Document.Body;
             if (body is null)
             {
@@ -80,7 +80,7 @@ public sealed class DocxHandler : IFormatReader, IFormatWriter
         };
 
         using MemoryStream buf = new();
-        using (WordprocessingDocument pkg = WordprocessingDocument.Create(buf, WordprocessingDocumentType.Document))
+        using (var pkg = WordprocessingDocument.Create(buf, WordprocessingDocumentType.Document))
         {
             MainDocumentPart mainPart = pkg.AddMainDocumentPart();
             W.Body body = new();

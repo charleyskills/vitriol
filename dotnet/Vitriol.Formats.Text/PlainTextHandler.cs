@@ -23,9 +23,6 @@ namespace Vitriol.Formats.Text;
 /// </summary>
 public sealed class PlainTextHandler : IFormatReader, IFormatWriter, IStreamConverter
 {
-    private readonly PlainToTextDocAdapter _parser = new();
-    private readonly TextDocToPlainAdapter _flattener = new();
-
     public DocKind Kind => DocKind.Text;
 
     public IReadOnlySet<string> SupportedExtensions { get; } =
@@ -43,7 +40,7 @@ public sealed class PlainTextHandler : IFormatReader, IFormatWriter, IStreamConv
 
         EncodingDetector.DetectionResult decoded =
             EncodingDetector.Decode(buffer.ToArray(), context.Progress);
-        TextDoc doc = _parser.Adapt(decoded.Text, context.Progress);
+        TextDoc doc = PlainToTextDocAdapter.Adapt(decoded.Text, context.Progress);
         return doc;
     }
 
@@ -61,16 +58,16 @@ public sealed class PlainTextHandler : IFormatReader, IFormatWriter, IStreamConv
                 $"PlainTextHandler.Write expects a TextDoc, got {document.GetType().Name}."),
         };
 
-        string flat = _flattener.Adapt(doc, context.Progress);
+        string flat = TextDocToPlainAdapter.Adapt(doc, context.Progress);
         byte[] bytes = Encoding.UTF8.GetBytes(flat);
         await output.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
     }
 
-    private TextDoc DecodeBinaryDoc(BinaryDoc bd, IProgress<ConversionEvent>? progress)
+    private static TextDoc DecodeBinaryDoc(BinaryDoc bd, IProgress<ConversionEvent>? progress)
     {
         EncodingDetector.DetectionResult decoded =
             EncodingDetector.Decode(bd.Bytes, progress);
-        return _parser.Adapt(decoded.Text, progress) with { Metadata = bd.Metadata };
+        return PlainToTextDocAdapter.Adapt(decoded.Text, progress) with { Metadata = bd.Metadata };
     }
 
     // -- IStreamConverter ----------------------------------------------------

@@ -31,7 +31,7 @@ public sealed class StoneEngineTests
     public void Unregistered_extensions_return_false()
     {
         IStoneEngine engine = BuildEngine();
-        engine.CanEmbedInto(".wav").ShouldBeFalse();
+        engine.CanEmbedInto(".mp3").ShouldBeFalse();
         engine.CanEmbedInto(".pdf").ShouldBeFalse();
     }
 

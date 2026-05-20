@@ -15,7 +15,7 @@ namespace Vitriol.Core.Routing;
 /// </summary>
 public sealed class TrailerEnvelopeGate : IRoutingGate
 {
-    private readonly IReadOnlyList<ITrailerEnvelopeReader> _readers;
+    private readonly ITrailerEnvelopeReader[] _readers;
 
     public TrailerEnvelopeGate(IEnumerable<ITrailerEnvelopeReader> readers)
     {
@@ -33,7 +33,7 @@ public sealed class TrailerEnvelopeGate : IRoutingGate
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        if (_readers.Count == 0)
+        if (_readers.Length == 0)
         {
             return RoutingDecision.NotApplicable.Instance;
         }

@@ -91,7 +91,7 @@ public sealed class UcmsEnvelopeTests
     {
         bool ok = UcmsEnvelope.TryParse(new byte[] { 0, 1, 2, 3, 4 }, out _, out string? error);
         ok.ShouldBeFalse();
-        error.ShouldContain("magic not found");
+        error!.ShouldContain("magic not found");
     }
 
     [Property(MaxTest = 50)]

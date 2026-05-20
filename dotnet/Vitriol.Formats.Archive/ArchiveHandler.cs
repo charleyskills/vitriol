@@ -74,6 +74,9 @@ public sealed class ArchiveHandler : IFormatReader, IFormatWriter
                 ArchiveKind.TarZst =>
                     "Writing TAR.ZST is not supported in this sprint (SharpCompress's "
                     + "tar+zstd writer pipeline needs verification; reading is fine).",
+                ArchiveKind.TarXz =>
+                    "Writing TAR.XZ is not supported (SharpCompress 0.48 does not "
+                    + "implement an xz writer for tar archives; reading is fine).",
                 _ => $"Writing {dstKind} is not supported.",
             });
         }
@@ -105,8 +108,8 @@ public sealed class ArchiveHandler : IFormatReader, IFormatWriter
         WriterOptions writerOptions = BuildWriterOptions(dstKind);
         ArchiveType writerType = ToWriterArchiveType(dstKind);
 
-        using IWriter writer = WriterFactory.Open(output, writerType, writerOptions);
-        using IReader reader = ReaderFactory.Open(srcStream);
+        using IWriter writer = WriterFactory.OpenWriter(output, writerType, writerOptions);
+        using IReader reader = ReaderFactory.OpenReader(srcStream, new ReaderOptions());
 
         while (reader.MoveToNextEntry())
         {
@@ -148,11 +151,11 @@ public sealed class ArchiveHandler : IFormatReader, IFormatWriter
 
     private static WriterOptions BuildWriterOptions(ArchiveKind kind) => kind switch
     {
-        ArchiveKind.Zip => new WriterOptions(CompressionType.Deflate),
-        ArchiveKind.Tar => new WriterOptions(CompressionType.None),
-        ArchiveKind.TarGz => new WriterOptions(CompressionType.GZip),
-        ArchiveKind.TarBz2 => new WriterOptions(CompressionType.BZip2),
-        ArchiveKind.TarXz => new WriterOptions(CompressionType.Xz),
+        ArchiveKind.Zip => WriterOptions.ForZip(CompressionType.Deflate),
+        ArchiveKind.Tar => WriterOptions.ForTar(CompressionType.None),
+        ArchiveKind.TarGz => WriterOptions.ForTar(CompressionType.GZip),
+        ArchiveKind.TarBz2 => WriterOptions.ForTar(CompressionType.BZip2),
+        ArchiveKind.TarXz => WriterOptions.ForTar(CompressionType.Xz),
         _ => throw new InvalidOperationException($"No writer options for {kind}"),
     };
 

@@ -5,7 +5,7 @@ using Vitriol.Core.Registry;
 using Vitriol.Formats.Tabular;
 using Vitriol.Formats.Text;
 
-namespace Vitriol.Tests.Formats.Tabular;
+namespace Vitriol.Tests.Formats.TabularHandlers;
 
 /// <summary>
 /// End-to-end integration: a tabular handler in the registry must route

@@ -48,5 +48,48 @@ csharp_style_namespace_declarations = file_scoped:warning
 # IDE0058 — "Expression value is never used". Noisy on fluent APIs.
 dotnet_diagnostic.IDE0058.severity = none
 
+# IDE0052 — "Remove unread private members". Logger fields are intentionally retained
+# while their call-sites are commented out during early sprints to reduce noise.
+dotnet_diagnostic.IDE0052.severity = suggestion
+
+# CA1000 — "Do not declare static members on generic types". The Empty pattern on
+# generic value-wrapper types (EquatableArray<T>, EquatableDictionary<K,V>) is
+# idiomatic in .NET (cf. ImmutableArray<T>.Empty) and intentional here.
+dotnet_diagnostic.CA1000.severity = suggestion
+
+# CA1716 — "Do not use reserved keywords as type names". ConversionEvent.Error and
+# StructuralComparisonResult.Error mirror the Python discriminated-union names
+# exactly; renaming would hurt cross-language fidelity.
+dotnet_diagnostic.CA1716.severity = suggestion
+
 # CA1848 — "Use the LoggerMessage delegates". Premature optimization for early sprints.
 dotnet_diagnostic.CA1848.severity = suggestion
+
+# CA1859 — "Use concrete types for improved performance". XlsxHandler.NormalizeNumber
+# intentionally returns object to carry either long or double to preserve round-trip
+# fidelity; changing the return type to double would silently lose integer precision.
+dotnet_diagnostic.CA1859.severity = suggestion
+
+# CA1707 — "Remove underscores from member names". xUnit convention uses
+# underscore-separated words in test method names (e.g., Method_does_something).
+# Renaming would hurt readability without any safety benefit.
+dotnet_diagnostic.CA1707.severity = suggestion
+
+# ── Test project overrides ────────────────────────────────────────────────────
+# Rules that fire legitimately in production but are too noisy or inappropriate
+# for test code are relaxed here so only the test assembly is affected.
+[Vitriol.Tests/**/*.cs]
+
+# IDE0007 / IDE0008 — 'var' enforcement. Tests intentionally name types
+# explicitly for documentation; the style rules conflict with each other
+# (apparent-type wants var; built-in-types wants explicit). Silence both.
+dotnet_diagnostic.IDE0007.severity = suggestion
+dotnet_diagnostic.IDE0008.severity = suggestion
+
+# CA1861 — "Prefer static readonly over inline array literals". Array literals
+# in [InlineData] attributes and single-call test helpers are fine as-is.
+dotnet_diagnostic.CA1861.severity = suggestion
+
+# CA1822 — "Mark members as static". Test helper methods are sometimes
+# non-static for clarity; enforcing static adds noise without safety benefit.
+dotnet_diagnostic.CA1822.severity = suggestion

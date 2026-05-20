@@ -33,10 +33,12 @@ public sealed class PngStoneHost : IStoneHost
     private static ReadOnlySpan<byte> PngSignature =>
         new byte[] { 0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A };
 
-    private static ReadOnlySpan<byte> TagIhdr => "IHDR"u8;
-    private static ReadOnlySpan<byte> TagIdat => "IDAT"u8;
-    private static ReadOnlySpan<byte> TagIend => "IEND"u8;
-    private static ReadOnlySpan<byte> TagUcMs => "ucMs"u8;
+    // byte[] so they can be passed to WriteChunkAsync (which takes ReadOnlyMemory<byte>,
+    // an async context incompatible with ReadOnlySpan<byte> parameters).
+    private static readonly byte[] TagIhdr = "IHDR"u8.ToArray();
+    private static readonly byte[] TagIdat = "IDAT"u8.ToArray();
+    private static readonly byte[] TagIend = "IEND"u8.ToArray();
+    private static readonly byte[] TagUcMs = "ucMs"u8.ToArray();
 
     public IReadOnlySet<string> SupportedExtensions { get; } =
         new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png" };
@@ -134,7 +136,7 @@ public sealed class PngStoneHost : IStoneHost
                     }
                     total += n;
                 }
-                UcmsEnvelope envelope = UcmsEnvelope.Parse(envBytes);
+                var envelope = UcmsEnvelope.Parse(envBytes);
                 return new StoneExtractionResult(envelope.Payload, envelope.Extension);
             }
             if (tag == "IEND")
@@ -150,7 +152,7 @@ public sealed class PngStoneHost : IStoneHost
         return await ExtractV3Async(source, options, cancellationToken).ConfigureAwait(false);
     }
 
-    private async ValueTask EmbedV1Async(
+    private static async ValueTask EmbedV1Async(
         ReadOnlyMemory<byte> sourceBytes,
         string sourceExtension,
         Stream destination,
@@ -236,7 +238,7 @@ public sealed class PngStoneHost : IStoneHost
         int maxEnv = (int)Math.Min(totalPixelBytes / MandelbrotBitPack.PixelBytesPerEnvelopeByte, int.MaxValue);
         byte[] envBytes = MandelbrotBitPack.Unpack(decoded.PixelsRgb, maxEnv);
 
-        UcmsV3Envelope envelope = UcmsV3Envelope.Parse(envBytes, options.Password);
+        var envelope = UcmsV3Envelope.Parse(envBytes, options.Password);
         return new StoneExtractionResult(envelope.Payload, envelope.Extension);
     }
 

@@ -3,6 +3,9 @@ using ClosedXML.Excel;
 using Vitriol.Core.Collections;
 using Vitriol.Core.Ir;
 using Vitriol.Core.Pipeline;
+// Inside namespace Vitriol.Formats.Tabular the name 'Tabular' resolves to the
+// enclosing namespace itself — use a distinct alias to refer to the IR record type.
+using TabularDoc = global::Vitriol.Core.Ir.Tabular;
 
 namespace Vitriol.Formats.Tabular;
 
@@ -51,7 +54,7 @@ public sealed class XlsxHandler : IFormatReader, IFormatWriter
                 sheets.Add(ReadWorksheet(worksheet));
             }
 
-            return new Tabular(new EquatableArray<Sheet>(sheets.ToImmutable()));
+            return new TabularDoc(new EquatableArray<Sheet>(sheets.ToImmutable()));
         }
         finally
         {
@@ -64,9 +67,9 @@ public sealed class XlsxHandler : IFormatReader, IFormatWriter
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(output);
 
-        Tabular tabular = document switch
+        TabularDoc tabular = document switch
         {
-            Tabular t => t,
+            TabularDoc t => t,
             _ => throw new InvalidOperationException(
                 $"XlsxHandler.Write expects a Tabular, got {document.GetType().Name}."),
         };

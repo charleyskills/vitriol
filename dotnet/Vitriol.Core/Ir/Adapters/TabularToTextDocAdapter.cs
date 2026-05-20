@@ -35,7 +35,7 @@ public sealed class TabularToTextDocAdapter : IDocumentAdapter<Tabular, TextDoc>
                 foreach (Cell cell in row)
                 {
                     string text = FormatCell(cell.Value);
-                    EquatableArray<Block> cellBlocks = EquatableArray.Create<Block>(
+                    var cellBlocks = EquatableArray.Create<Block>(
                         new Paragraph(EquatableArray.Create(new Run(text))));
                     cells.Add(cellBlocks);
                 }

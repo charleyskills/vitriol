@@ -17,8 +17,6 @@ public sealed class AdapterRegistry
 {
     private readonly TabularToTextDocAdapter _tabularToText = new();
     private readonly TextDocToTabularAdapter _textToTabular = new();
-    private readonly TextDocToPlainAdapter _textToPlain = new();
-    private readonly PlainToTextDocAdapter _plainToText = new();
 
     public bool TryAdapt(
         IDocument source,
@@ -30,10 +28,10 @@ public sealed class AdapterRegistry
         {
             (Tabular t, DocKind.Text) => _tabularToText.Adapt(t, progress),
             (TextDoc d, DocKind.Tabular) => _textToTabular.Adapt(d, progress),
-            (TextDoc d, DocKind.Binary) => Utf8Encode(_textToPlain.Adapt(d, progress), d.Metadata),
+            (TextDoc d, DocKind.Binary) => Utf8Encode(TextDocToPlainAdapter.Adapt(d, progress), d.Metadata),
             (BinaryDoc b, DocKind.Text) => Utf8Decode(b, progress),
             (Tabular t, DocKind.Binary) => Utf8Encode(
-                _textToPlain.Adapt(_tabularToText.Adapt(t, progress), progress),
+                TextDocToPlainAdapter.Adapt(_tabularToText.Adapt(t, progress), progress),
                 t.Metadata),
             (BinaryDoc b, DocKind.Tabular) => _textToTabular.Adapt(Utf8Decode(b, progress), progress),
             _ => null,
@@ -48,7 +46,7 @@ public sealed class AdapterRegistry
         return new BinaryDoc(bytes, "text/plain; charset=utf-8", metadata);
     }
 
-    private TextDoc Utf8Decode(BinaryDoc binary, IProgress<ConversionEvent>? progress)
+    private static TextDoc Utf8Decode(BinaryDoc binary, IProgress<ConversionEvent>? progress)
     {
         if (!TryDecodeUtf8(binary.Bytes.Span, out string text))
         {
@@ -56,7 +54,7 @@ public sealed class AdapterRegistry
                 "Binary → Text adapter: source bytes are not valid UTF-8. "
                 + "Decoded with U+FFFD replacement; original bytes are lost."));
         }
-        return _plainToText.Adapt(text, progress) with { Metadata = binary.Metadata };
+        return PlainToTextDocAdapter.Adapt(text, progress) with { Metadata = binary.Metadata };
     }
 
     private static bool TryDecodeUtf8(ReadOnlySpan<byte> bytes, out string text)

@@ -27,17 +27,14 @@ public static class MandelbrotDims
     private static readonly (long Cap, int Side)[] Tiers =
     {
         (1080L * 1080L, 1080),
-        (2048L * 2048L, 2048),
-        (4096L * 4096L, 4096),
-        (8192L * 8192L, 8192),
+        (1920L * 1920L, 2048),
+        (3840L * 3840L, 4096),
+        (7680L * 7680L, 8192),
     };
 
     public static (int Width, int Height) ForEnvelope(int envelopeBytes)
     {
-        if (envelopeBytes < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(envelopeBytes));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(envelopeBytes);
 
         long pixelBytesNeeded = (long)envelopeBytes * PixelBytesPerEnvelopeByte;
         long pixelsNeeded = (pixelBytesNeeded + 2) / 3;

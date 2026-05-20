@@ -10,7 +10,7 @@ namespace Vitriol.Core.Ir;
 /// </summary>
 public sealed record VitriolOrigin(ReadOnlyMemory<byte> Bytes, string Extension)
 {
-    public virtual bool Equals(VitriolOrigin? other)
+    public bool Equals(VitriolOrigin? other)
     {
         if (other is null)
         {

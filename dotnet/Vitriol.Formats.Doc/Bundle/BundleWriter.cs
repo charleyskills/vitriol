@@ -95,8 +95,8 @@ public static class BundleWriter
 
         TextDoc bundledDoc = doc with
         {
-            Blocks = new EquatableArray<Block>(
-                doc.Blocks.AsSpan().ToArray().Select(b => RewriteHrefs(b, imageHrefMap)).ToArray()),
+            Blocks = doc.Blocks.AsSpan().ToArray()
+                .Select(b => RewriteHrefs(b, imageHrefMap)).ToEquatableArray(),
         };
 
         string mdPath = Path.Combine(bundleDir, stem + ".md");
@@ -143,31 +143,28 @@ public static class BundleWriter
             case ListBlock list:
                 return list with
                 {
-                    Items = new EquatableArray<EquatableArray<Block>>(
-                        list.Items.AsSpan().ToArray().Select(item =>
-                            new EquatableArray<Block>(
-                                item.AsSpan().ToArray()
-                                    .Select(b => RewriteHrefs(b, map))
-                                    .ToArray())).ToArray()),
+                    Items = list.Items.AsSpan().ToArray()
+                        .Select(item => item.AsSpan().ToArray()
+                            .Select(b => RewriteHrefs(b, map))
+                            .ToEquatableArray())
+                        .ToEquatableArray(),
                 };
             case TableBlock table:
                 return table with
                 {
-                    Rows = new EquatableArray<EquatableArray<EquatableArray<Block>>>(
-                        table.Rows.AsSpan().ToArray().Select(row =>
-                            new EquatableArray<EquatableArray<Block>>(
-                                row.AsSpan().ToArray().Select(cell =>
-                                    new EquatableArray<Block>(
-                                        cell.AsSpan().ToArray()
-                                            .Select(b => RewriteHrefs(b, map))
-                                            .ToArray())).ToArray())).ToArray()),
+                    Rows = table.Rows.AsSpan().ToArray()
+                        .Select(row => row.AsSpan().ToArray()
+                            .Select(cell => cell.AsSpan().ToArray()
+                                .Select(b => RewriteHrefs(b, map))
+                                .ToEquatableArray())
+                            .ToEquatableArray())
+                        .ToEquatableArray(),
                 };
             case Blockquote bq:
                 return bq with
                 {
-                    Blocks = new EquatableArray<Block>(
-                        bq.Blocks.AsSpan().ToArray()
-                            .Select(b => RewriteHrefs(b, map)).ToArray()),
+                    Blocks = bq.Blocks.AsSpan().ToArray()
+                        .Select(b => RewriteHrefs(b, map)).ToEquatableArray(),
                 };
             default:
                 return block;

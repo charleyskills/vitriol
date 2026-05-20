@@ -33,7 +33,7 @@ public sealed record ArchiveDoc(
     public ArchiveDoc(ReadOnlyMemory<byte> bytes, ArchiveKind kind)
         : this(bytes, kind, DocumentMetadata.Empty) { }
 
-    public virtual bool Equals(ArchiveDoc? other)
+    public bool Equals(ArchiveDoc? other)
     {
         if (other is null)
         {
@@ -93,6 +93,8 @@ public static class ArchiveKindMap
     /// counterpart today.</item>
     /// <item><c>.tar.zst</c> — SharpCompress's tar+zstd writer pipeline
     /// is not stable across versions; deferred until verified.</item>
+    /// <item><c>.tar.xz</c> — SharpCompress 0.48 does not implement an xz
+    /// writer for tar archives; reading xz-compressed tars is supported.</item>
     /// </list>
     /// </summary>
     public static readonly IReadOnlySet<string> WritableExtensions =
@@ -100,7 +102,8 @@ public static class ArchiveKindMap
             ByExtension
                 .Where(kv => kv.Value != ArchiveKind.Rar
                     && kv.Value != ArchiveKind.SevenZip
-                    && kv.Value != ArchiveKind.TarZst)
+                    && kv.Value != ArchiveKind.TarZst
+                    && kv.Value != ArchiveKind.TarXz)
                 .Select(kv => kv.Key),
             StringComparer.OrdinalIgnoreCase);
 

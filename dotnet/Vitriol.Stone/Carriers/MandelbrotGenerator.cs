@@ -37,14 +37,8 @@ public static class MandelbrotGenerator
     /// </summary>
     public static byte[] Generate(int width, int height, MandelbrotSeed.Result seed)
     {
-        if (width <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(width));
-        }
-        if (height <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(height));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
 
         // Render at FractalCap × FractalCap (or smaller) and up-scale if needed.
         int compW = width;

@@ -85,7 +85,7 @@ public sealed class TxtStoneHost : IStoneHost
         await source.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
         byte[] envBytes = DecodeBase64(buffer.GetBuffer().AsSpan(0, (int)buffer.Length));
 
-        UcmsEnvelope envelope = UcmsEnvelope.Parse(envBytes);
+        var envelope = UcmsEnvelope.Parse(envBytes);
         return new StoneExtractionResult(envelope.Payload, envelope.Extension);
     }
 

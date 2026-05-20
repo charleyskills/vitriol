@@ -25,7 +25,7 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IReadO
 
     public bool IsDefaultOrEmpty => _array.IsDefaultOrEmpty;
 
-    public ImmutableArray<T> AsImmutableArray() => _array.IsDefault ? ImmutableArray<T>.Empty : _array;
+    public ImmutableArray<T> AsImmutableArray() => _array.IsDefault ? [] : _array;
 
     public ReadOnlySpan<T> AsSpan() => AsImmutableArray().AsSpan();
 

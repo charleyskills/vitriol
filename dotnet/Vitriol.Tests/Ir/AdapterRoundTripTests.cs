@@ -90,7 +90,7 @@ public sealed class AdapterRoundTripTests
             new Heading(1, EquatableArray.Create(new Run("Dup"))),
             new TableBlock(EquatableArray.Create(
                 EquatableArray.Create(EquatableArray.Create<Block>(
-                    new Paragraph(EquatableArray.Create(new Run("b"))))))));
+                    new Paragraph(EquatableArray.Create(new Run("b")))))))));
 
         Tabular result = new TextDocToTabularAdapter().Adapt(doc);
 
@@ -103,11 +103,9 @@ public sealed class AdapterRoundTripTests
     public void Plain_round_trip_collapses_extra_blank_lines()
     {
         string text = "Paragraph one.\n\nParagraph two.\n\n\n\nParagraph three.";
-        PlainToTextDocAdapter parser = new();
-        TextDocToPlainAdapter flattener = new();
 
-        TextDoc doc = parser.Adapt(text);
-        string flat = flattener.Adapt(doc);
+        TextDoc doc = PlainToTextDocAdapter.Adapt(text);
+        string flat = TextDocToPlainAdapter.Adapt(doc);
 
         doc.Blocks.Count.ShouldBe(3);
         flat.ShouldBe("Paragraph one.\n\nParagraph two.\n\nParagraph three.");
@@ -139,8 +137,14 @@ public sealed class AdapterRoundTripTests
     public Property Plain_text_round_trip_preserves_paragraphs(NonEmptyArray<NonWhiteSpaceString> paragraphs)
     {
         // Build paragraphs from arbitrary non-whitespace tokens joined with blank lines.
+        // ReplaceLineEndings(" ") normalises ALL Unicode line-terminators that
+        // String.ReplaceLineEndings (and therefore PlainToTextDocAdapter) recognises:
+        // LF, CR, CRLF, FF (\f), VT (\v), NEL (U+0085), LS (U+2028), PS (U+2029).
+        // Using only Replace("\r"/"\ n") would miss form-feed and the rest, causing
+        // the adapter to replace them with "\n" while 'text' still carries the original
+        // character — making round != text even for correct production code.
         string[] cleanParagraphs = paragraphs.Get
-            .Select(p => p.Get.Trim().Replace("\r", string.Empty).Replace("\n", " "))
+            .Select(p => p.Get.ReplaceLineEndings(" ").Trim())
             .Where(p => p.Length > 0)
             .ToArray();
 
@@ -151,11 +155,8 @@ public sealed class AdapterRoundTripTests
 
         string text = string.Join("\n\n", cleanParagraphs);
 
-        PlainToTextDocAdapter parser = new();
-        TextDocToPlainAdapter flattener = new();
-
-        TextDoc doc = parser.Adapt(text);
-        string round = flattener.Adapt(doc);
+        TextDoc doc = PlainToTextDocAdapter.Adapt(text);
+        string round = TextDocToPlainAdapter.Adapt(doc);
 
         return (round == text).Label($"round=\"{round}\", text=\"{text}\"");
     }

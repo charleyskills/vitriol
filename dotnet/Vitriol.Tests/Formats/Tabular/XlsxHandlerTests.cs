@@ -1,7 +1,7 @@
 using Vitriol.Core.Pipeline;
 using Vitriol.Formats.Tabular;
 
-namespace Vitriol.Tests.Formats.Tabular;
+namespace Vitriol.Tests.Formats.TabularHandlers;
 
 public sealed class XlsxHandlerTests
 {

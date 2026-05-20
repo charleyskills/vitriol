@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Vitriol</RootNamespace>
+    <AssemblyName>Vitriol</AssemblyName>
+    <Description>
+      Vitriol file-conversion engine — umbrella package.
+      Adds a single AddVitriol() extension and pulls in all format libraries
+      (Core, Stone, Text, Image, Tabular, Archive, Crypto, Doc) as dependencies.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vitriol.Core\Vitriol.Core.csproj" />
+    <ProjectReference Include="..\Vitriol.Stone\Vitriol.Stone.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Text\Vitriol.Formats.Text.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Image\Vitriol.Formats.Image.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Tabular\Vitriol.Formats.Tabular.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Archive\Vitriol.Formats.Archive.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Crypto\Vitriol.Formats.Crypto.csproj" />
+    <ProjectReference Include="..\Vitriol.Formats.Doc\Vitriol.Formats.Doc.csproj" />
+  </ItemGroup>
+
+</Project>

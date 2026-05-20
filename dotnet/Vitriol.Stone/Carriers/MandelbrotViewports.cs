@@ -88,7 +88,6 @@ public static class MandelbrotViewports
         new(-1.985409, 0.0, 0.0008),
         new(0.359, 0.0865, 0.012),
         new(-1.7396, 0.0, 0.005),
-        new(-0.16, 1.04, 0.005),
 
         // Misiurewicz points.
         new(-0.77568377, 0.13646737, 0.005),
